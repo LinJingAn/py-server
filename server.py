@@ -120,6 +120,12 @@ class Simulator:
             return False
         return "Cursor" in self.current_window
 
+    def is_vscode_active(self):
+        """Check if Visual Studio Code is the active window"""
+        if not self.current_window:
+            return False
+        return "Visual Studio Code" in self.current_window or "Code" in self.current_window
+
     def switch_chrome_tabs(self):
         """Switch between Chrome tabs using keyboard shortcuts"""
         if not self.is_chrome_active():
@@ -142,6 +148,32 @@ class Simulator:
             return
 
         # Open file switcher
+        pyautogui.hotkey('ctrl', 'p')
+        time.sleep(random.uniform(0.3, 0.5))
+
+    def switch_vscode_tabs(self):
+        """Switch between VSCode tabs using keyboard shortcuts"""
+        if not self.is_vscode_active():
+            return
+
+        # Randomly decide how many tabs to switch (1-3)
+        num_switches = random.randint(1, 3)
+        for _ in range(num_switches):
+            # Use Ctrl+Tab to switch to next tab
+            pyautogui.hotkey('ctrl', 'tab')
+            time.sleep(random.uniform(0.2, 0.5))
+        
+        # Sometimes use Ctrl+Shift+Tab to go backwards
+        if random.random() < 0.3:  # 30% chance to go backwards
+            pyautogui.hotkey('ctrl', 'shift', 'tab')
+            time.sleep(random.uniform(0.2, 0.5))
+
+    def switch_vscode_files(self):
+        """Switch between VSCode files using keyboard shortcuts"""
+        if not self.is_vscode_active():
+            return
+
+        # Open file switcher (Ctrl+P)
         pyautogui.hotkey('ctrl', 'p')
         time.sleep(random.uniform(0.3, 0.5))
 
@@ -301,13 +333,19 @@ class Simulator:
         
         time.sleep(random.uniform(0.5, 1.0))
 
-        # Handle special cases for Chrome and Cursor
+        # Handle special cases for Chrome, Cursor, and VSCode
         if self.is_chrome_active():
             if random.random() < 0.7:  # 70% chance to switch tabs when Chrome is active
                 self.switch_chrome_tabs()
         elif self.is_cursor_ide_active():
             if random.random() < 0.6:  # 60% chance to switch files when Cursor is active
                 self.switch_cursor_files()
+        elif self.is_vscode_active():
+            if random.random() < 0.6:  # 60% chance to switch tabs/files when VSCode is active
+                if random.random() < 0.7:  # 70% chance for tab switching, 30% for file switching
+                    self.switch_vscode_tabs()
+                else:
+                    self.switch_vscode_files()
     
     def simulate_scroll(self):
         """Simulate natural scrolling behavior"""
@@ -473,8 +511,8 @@ class Simulator:
 
     def simulate_coding_activity(self):
         """Simulate coding-like behavior without actually modifying code"""
-        # Only proceed if Cursor IDE is active
-        if not self.is_cursor_ide_active():
+        # Only proceed if Cursor IDE or VSCode is active
+        if not (self.is_cursor_ide_active() or self.is_vscode_active()):
             return
 
         # Code patterns for both React/TypeScript and vanilla JavaScript/HTML development
@@ -1067,35 +1105,60 @@ class Simulator:
             if random.random() < 0.1:
                 self.update_window_list()
             
-            # Switch windows more frequently
-            if random.random() < 0.4:  # 40% chance to switch windows
-                self.switch_window()
-            # Additional tab/file switching without window switch
-            elif self.is_chrome_active() and random.random() < 0.3:  # 30% chance to switch tabs
-                self.switch_chrome_tabs()
-            elif self.is_cursor_ide_active() and random.random() < 0.3:  # 30% chance to switch files
-                self.switch_cursor_files()
+            # Ensure at least 65% action rate by adjusting probabilities
+            action_performed = False
             
-            # Choose activity with increased scroll probability
-            activity = random.random()
-            if activity < 0.4:  # 40% chance for scrolling
-                self.simulate_scroll()
-            elif activity < 0.6:  # 20% chance for mouse movement (increased for Ubuntu)
-                self.natural_mouse_movement()
-            elif activity < 0.75:  # 15% chance for coding activity
-                self.simulate_coding_activity()
-            else:  # 25% chance for clicking (increased for Ubuntu)
-                pyautogui.click()
+            # Switch windows more frequently
+            if random.random() < 0.5:  # Increased from 40% to 50% chance to switch windows
+                self.switch_window()
+                action_performed = True
+            # Additional tab/file switching without window switch
+            elif self.is_chrome_active() and random.random() < 0.4:  # Increased from 30% to 40% chance to switch tabs
+                self.switch_chrome_tabs()
+                action_performed = True
+            elif self.is_cursor_ide_active() and random.random() < 0.4:  # Increased from 30% to 40% chance to switch files
+                self.switch_cursor_files()
+                action_performed = True
+            elif self.is_vscode_active() and random.random() < 0.4:  # Increased from 30% to 40% chance to switch tabs/files
+                if random.random() < 0.7:  # 70% chance for tab switching, 30% for file switching
+                    self.switch_vscode_tabs()
+                else:
+                    self.switch_vscode_files()
+                action_performed = True
+            
+            # Choose activity with guaranteed 65%+ action rate
+            if not action_performed:  # If no window/tab switching occurred, ensure other actions
+                activity = random.random()
+                if activity < 0.45:  # 45% chance for scrolling
+                    self.simulate_scroll()
+                elif activity < 0.7:  # 25% chance for mouse movement
+                    self.natural_mouse_movement()
+                elif activity < 0.85:  # 15% chance for coding activity
+                    self.simulate_coding_activity()
+                else:  # 15% chance for clicking
+                    pyautogui.click()
+            else:
+                # Even if window/tab switching occurred, still do other activities sometimes
+                if random.random() < 0.3:  # 30% chance for additional activity
+                    activity = random.random()
+                    if activity < 0.4:  # 40% chance for scrolling
+                        self.simulate_scroll()
+                    elif activity < 0.7:  # 30% chance for mouse movement
+                        self.natural_mouse_movement()
+                    elif activity < 0.85:  # 15% chance for coding activity
+                        self.simulate_coding_activity()
+                    else:  # 15% chance for clicking
+                        pyautogui.click()
             
             # Update activity level
             self.update_activity_level()
             
-            # Take shorter breaks less frequently
-            if random.random() < 0.03:  # Reduced from 0.05 to 0.03 for less frequent breaks
+            # Take shorter breaks less frequently to maintain 65%+ activity rate
+            if random.random() < 0.02:  # Reduced from 0.03 to 0.02 for even less frequent breaks
                 self.simulate_break()
             
-            # Shorter delays between actions
-            time.sleep(random.uniform(0.1, 0.5))  # Reduced from 0.2-1.0 to 0.1-0.5
+            # Consistent delays between actions to maintain 65%+ activity rate
+            time.sleep(random.uniform(0.05, 0.3))  # Reduced from 0.1-0.5 to 0.05-0.3 for more frequent actions
 
 if __name__ == "__main__":
     
