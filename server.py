@@ -458,7 +458,7 @@ class Simulator:
                 # Smaller scroll amounts for more natural movement
                 # Reduce scroll amount on Ubuntu for slower scrolling
                 if self.platform != "Windows":
-                    scroll_amount = random.randint(-30, 30)  # Reduced from -100, 100
+                    scroll_amount = random.randint(-20, 10)  # Reduced from -100, 100
                 else:
                     scroll_amount = random.randint(-100, 100)
                 # Update scroll position (positive = scrolled down)
@@ -471,7 +471,7 @@ class Simulator:
                 time.sleep(random.uniform(0.05, 0.15))  # Shorter delays between scrolls
             
             # Small pause between scroll sequences
-            time.sleep(random.uniform(0.1, 0.3))
+            time.sleep(random.uniform(0.1, 0.6))
     
     def natural_mouse_movement(self):
         """Simulate natural mouse movement with acceleration and deceleration"""
