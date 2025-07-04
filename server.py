@@ -451,16 +451,16 @@ class Simulator:
             # Check if we're in a code editor (VS Code or Cursor)
             is_code_editor = self.is_vscode_active() or self.is_cursor_ide_active()
             
-            # Check if we're near the bottom and should scroll up
+            # Check if we're near the bottom and should scroll to top
             if self.scroll_position >= self.scroll_threshold:
                 if is_code_editor:
-                    # In code editors, scroll up more to ensure code is visible
-                    scroll_amount = random.randint(-80, -40)  # Scroll up more for code visibility
-                    self.scroll_position = max(0, self.scroll_position + scroll_amount)
+                    # In code editors, scroll back to top (head) when reaching bottom
+                    scroll_amount = -self.scroll_position  # Scroll all the way back to top
+                    self.scroll_position = 0  # Reset to top
                 else:
-                    # In other applications, normal scroll up behavior
-                    scroll_amount = random.randint(-50, -20)  # Scroll up
-                    self.scroll_position = max(0, self.scroll_position + scroll_amount)
+                    # In other applications, scroll back to top as well
+                    scroll_amount = -self.scroll_position  # Scroll all the way back to top
+                    self.scroll_position = 0  # Reset to top
             else:
                 # Normal scrolling behavior
                 # Smaller scroll amounts for more natural movement
