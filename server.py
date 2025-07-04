@@ -312,16 +312,30 @@ class Simulator:
             end_y = random.randint(0, self.screen_height)
         
         # Create a natural curve for the mouse movement with fewer steps for faster movement
-        steps = random.randint(10, 20)  # Reduced from 20-40 to 10-20
-        for i in range(steps):
-            progress = i / steps
-            ease = 0.5 - math.cos(progress * math.pi) / 2
-            
-            x = start_x + (end_x - start_x) * ease
-            y = start_y + (end_y - start_y) * ease
-            
-            pyautogui.moveTo(x, y, duration=0.005)  # Reduced from 0.01 to 0.005
-            time.sleep(random.uniform(0.001, 0.005))  # Reduced from 0.01-0.03 to 0.001-0.005
+        if self.platform != "Windows":
+            # Ubuntu: More visible mouse movement with longer duration
+            steps = random.randint(15, 25)  # More steps for smoother movement
+            for i in range(steps):
+                progress = i / steps
+                ease = 0.5 - math.cos(progress * math.pi) / 2
+                
+                x = start_x + (end_x - start_x) * ease
+                y = start_y + (end_y - start_y) * ease
+                
+                pyautogui.moveTo(x, y, duration=0.02)  # Longer duration for Ubuntu
+                time.sleep(random.uniform(0.01, 0.03))  # Longer delays for Ubuntu
+        else:
+            # Windows: Faster movement
+            steps = random.randint(10, 20)  # Reduced from 20-40 to 10-20
+            for i in range(steps):
+                progress = i / steps
+                ease = 0.5 - math.cos(progress * math.pi) / 2
+                
+                x = start_x + (end_x - start_x) * ease
+                y = start_y + (end_y - start_y) * ease
+                
+                pyautogui.moveTo(x, y, duration=0.005)  # Reduced from 0.01 to 0.005
+                time.sleep(random.uniform(0.001, 0.005))  # Reduced from 0.01-0.03 to 0.001-0.005
     
     def delete_last_written_code(self):
         """Delete the last written code pattern by pressing backspace for each character"""
@@ -560,13 +574,13 @@ class Simulator:
             
             # Choose activity with increased scroll probability
             activity = random.random()
-            if activity < 0.5:  # 50% chance for scrolling
+            if activity < 0.4:  # 40% chance for scrolling
                 self.simulate_scroll()
-            elif activity < 0.65:  # 15% chance for mouse movement
+            elif activity < 0.6:  # 20% chance for mouse movement (increased for Ubuntu)
                 self.natural_mouse_movement()
-            elif activity < 0.8:  # 15% chance for coding activity
+            elif activity < 0.75:  # 15% chance for coding activity
                 self.simulate_coding_activity()
-            else:  # 20% chance for clicking
+            else:  # 25% chance for clicking (increased for Ubuntu)
                 pyautogui.click()
             
             # Update activity level
