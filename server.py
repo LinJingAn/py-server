@@ -28,6 +28,12 @@ class Simulator:
         self.current_window = None
         self.window_list = []
         self.platform = platform.system()
+        
+        # Scroll position tracking
+        self.scroll_position = 0  # 0 = top, positive = scrolled down
+        self.max_scroll_position = 1000  # Arbitrary max scroll position
+        self.scroll_threshold = 800  # When to start scrolling up
+        
         self.update_window_list()
         
     def update_window_list(self):
@@ -437,17 +443,27 @@ class Simulator:
                 self.switch_vscode_files()
     
     def simulate_scroll(self):
-        """Simulate natural scrolling behavior"""
+        """Simulate natural scrolling behavior with bottom detection"""
         # More frequent small scrolls
         num_scrolls = random.randint(2, 5)  # Do multiple scrolls in sequence
         
         for _ in range(num_scrolls):
-            # Smaller scroll amounts for more natural movement
-            # Reduce scroll amount on Ubuntu for slower scrolling
-            if self.platform != "Windows":
-                scroll_amount = random.randint(-30, 30)  # Reduced from -100, 100
+            # Check if we're near the bottom and should scroll up
+            if self.scroll_position >= self.scroll_threshold:
+                # Scroll up a little bit to simulate natural behavior
+                scroll_amount = random.randint(-50, -20)  # Scroll up
+                self.scroll_position = max(0, self.scroll_position + scroll_amount)
             else:
-                scroll_amount = random.randint(-100, 100)
+                # Normal scrolling behavior
+                # Smaller scroll amounts for more natural movement
+                # Reduce scroll amount on Ubuntu for slower scrolling
+                if self.platform != "Windows":
+                    scroll_amount = random.randint(-30, 30)  # Reduced from -100, 100
+                else:
+                    scroll_amount = random.randint(-100, 100)
+                # Update scroll position (positive = scrolled down)
+                self.scroll_position = max(0, min(self.max_scroll_position, self.scroll_position + scroll_amount))
+            
             # Split into smaller steps for smoother scrolling
             steps = random.randint(2, 4)
             for _ in range(steps):
