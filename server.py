@@ -25,6 +25,8 @@ else:
 
 # Safety feature - move mouse to corner to stop
 pyautogui.FAILSAFE = True
+# Optional: Increase fail-safe delay (default is 0.1 seconds)
+pyautogui.FAILSAFE_DELAY = 0.5  # 0.5 seconds instead of 0.1
 
 class Simulator:
     def __init__(self):
