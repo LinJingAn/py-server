@@ -267,7 +267,7 @@ class Simulator:
             # Smaller scroll amounts for more natural movement
             # Reduce scroll amount on Ubuntu for slower scrolling
             if self.platform != "Windows":
-                scroll_amount = random.randint(-50, 50)  # Reduced from -100, 100
+                scroll_amount = random.randint(-30, 30)  # Reduced from -100, 100
             else:
                 scroll_amount = random.randint(-100, 100)
             # Split into smaller steps for smoother scrolling
