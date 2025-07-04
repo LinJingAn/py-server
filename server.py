@@ -16,6 +16,12 @@ else:
     import subprocess
     import re
     import os
+    # Try to import pynput for alternative mouse control
+    try:
+        from pynput import mouse
+        PYNPUT_AVAILABLE = True
+    except ImportError:
+        PYNPUT_AVAILABLE = False
 
 # Safety feature - move mouse to corner to stop
 pyautogui.FAILSAFE = True
@@ -313,10 +319,11 @@ class Simulator:
         
         # Create a natural curve for the mouse movement with fewer steps for faster movement
         if self.platform != "Windows":
-            # Ubuntu: Try xdotool first, fallback to pyautogui
+            # Ubuntu: Multiple fallback methods for mouse movement
+            steps = random.randint(10, 15)
+            
+            # Method 1: Try xdotool with relative movement
             try:
-                # Use xdotool for more reliable mouse movement on Ubuntu
-                steps = random.randint(10, 15)
                 for i in range(steps):
                     progress = i / steps
                     ease = 0.5 - math.cos(progress * math.pi) / 2
@@ -324,23 +331,85 @@ class Simulator:
                     x = int(start_x + (end_x - start_x) * ease)
                     y = int(start_y + (end_y - start_y) * ease)
                     
-                    # Use xdotool for mouse movement
-                    subprocess.run(['xdotool', 'mousemove', str(x), str(y)], 
+                    # Use xdotool with relative movement
+                    subprocess.run(['xdotool', 'mousemove_relative', str(x - start_x), str(y - start_y)], 
                                  capture_output=True, check=False)
                     time.sleep(random.uniform(0.05, 0.1))
                     
             except (subprocess.SubprocessError, FileNotFoundError):
-                # Fallback to pyautogui if xdotool is not available
-                steps = random.randint(15, 25)  # More steps for smoother movement
-                for i in range(steps):
-                    progress = i / steps
-                    ease = 0.5 - math.cos(progress * math.pi) / 2
-                    
-                    x = start_x + (end_x - start_x) * ease
-                    y = start_y + (end_y - start_y) * ease
-                    
-                    pyautogui.moveTo(x, y, duration=0.02)  # Longer duration for Ubuntu
-                    time.sleep(random.uniform(0.01, 0.03))  # Longer delays for Ubuntu
+                # Method 2: Try xdotool with absolute coordinates
+                try:
+                    for i in range(steps):
+                        progress = i / steps
+                        ease = 0.5 - math.cos(progress * math.pi) / 2
+                        
+                        x = int(start_x + (end_x - start_x) * ease)
+                        y = int(start_y + (end_y - start_y) * ease)
+                        
+                        # Use xdotool with absolute coordinates
+                        subprocess.run(['xdotool', 'mousemove', str(x), str(y)], 
+                                     capture_output=True, check=False)
+                        time.sleep(random.uniform(0.05, 0.1))
+                        
+                except (subprocess.SubprocessError, FileNotFoundError):
+                    # Method 3: Try xte (part of xautomation)
+                    try:
+                        for i in range(steps):
+                            progress = i / steps
+                            ease = 0.5 - math.cos(progress * math.pi) / 2
+                            
+                            x = int(start_x + (end_x - start_x) * ease)
+                            y = int(start_y + (end_y - start_y) * ease)
+                            
+                            # Use xte for mouse movement
+                            subprocess.run(['xte', f'mousemove {x} {y}'], 
+                                         capture_output=True, check=False)
+                            time.sleep(random.uniform(0.05, 0.1))
+                            
+                    except (subprocess.SubprocessError, FileNotFoundError):
+                        # Method 4: Try pyautogui with longer duration
+                        try:
+                            steps = random.randint(15, 25)  # More steps for smoother movement
+                            for i in range(steps):
+                                progress = i / steps
+                                ease = 0.5 - math.cos(progress * math.pi) / 2
+                                
+                                x = start_x + (end_x - start_x) * ease
+                                y = start_y + (end_y - start_y) * ease
+                                
+                                pyautogui.moveTo(x, y, duration=0.05)  # Longer duration for Ubuntu
+                                time.sleep(random.uniform(0.02, 0.05))  # Longer delays for Ubuntu
+                                
+                        except Exception:
+                            # Method 5: Try pynput if available
+                            if PYNPUT_AVAILABLE:
+                                try:
+                                    controller = mouse.Controller()
+                                    for i in range(steps):
+                                        progress = i / steps
+                                        ease = 0.5 - math.cos(progress * math.pi) / 2
+                                        
+                                        x = int(start_x + (end_x - start_x) * ease)
+                                        y = int(start_y + (end_y - start_y) * ease)
+                                        
+                                        controller.position = (x, y)
+                                        time.sleep(random.uniform(0.05, 0.1))
+                                except Exception:
+                                    # Method 6: Fallback to simple click at random position
+                                    try:
+                                        pyautogui.click(x=end_x, y=end_y)
+                                        time.sleep(random.uniform(0.1, 0.3))
+                                    except Exception:
+                                        # Last resort: just wait
+                                        time.sleep(random.uniform(0.5, 1.0))
+                            else:
+                                # Method 6: Fallback to simple click at random position
+                                try:
+                                    pyautogui.click(x=end_x, y=end_y)
+                                    time.sleep(random.uniform(0.1, 0.3))
+                                except Exception:
+                                    # Last resort: just wait
+                                    time.sleep(random.uniform(0.5, 1.0))
         else:
             # Windows: Faster movement
             steps = random.randint(10, 20)  # Reduced from 20-40 to 10-20
