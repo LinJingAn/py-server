@@ -16,17 +16,9 @@ else:
     import subprocess
     import re
     import os
-    # Try to import pynput for alternative mouse control
-    try:
-        from pynput import mouse
-        PYNPUT_AVAILABLE = True
-    except ImportError:
-        PYNPUT_AVAILABLE = False
 
 # Safety feature - move mouse to corner to stop
 pyautogui.FAILSAFE = True
-# Optional: Increase fail-safe delay (default is 0.1 seconds)
-pyautogui.FAILSAFE_DELAY = 0.5  # 0.5 seconds instead of 0.1
 
 class Simulator:
     def __init__(self):
@@ -120,18 +112,6 @@ class Simulator:
             return False
         return "Cursor" in self.current_window
 
-    def is_vscode_active(self):
-        """Check if Visual Studio Code is the active window"""
-        if not self.current_window:
-            return False
-        return "Visual Studio Code" in self.current_window or "Code" in self.current_window
-
-    def is_postman_active(self):
-        """Check if Postman is the active window"""
-        if not self.current_window:
-            return False
-        return "Postman" in self.current_window
-
     def switch_chrome_tabs(self):
         """Switch between Chrome tabs using keyboard shortcuts"""
         if not self.is_chrome_active():
@@ -141,7 +121,7 @@ class Simulator:
         num_switches = random.randint(1, 3)
         for _ in range(num_switches):
             # Use Ctrl+Tab to switch to next tab
-            self.safe_action(lambda: pyautogui.hotkey('ctrl', 'tab'), fallback_delay=0.3)
+            pyautogui.hotkey('ctrl', 'tab')
             # Slower tab switching on Ubuntu
             if self.platform != "Windows":
                 time.sleep(random.uniform(0.4, 0.8))  # Increased delay for Ubuntu
@@ -154,86 +134,8 @@ class Simulator:
             return
 
         # Open file switcher
-        self.safe_action(lambda: pyautogui.hotkey('ctrl', 'p'), fallback_delay=0.3)
+        pyautogui.hotkey('ctrl', 'p')
         time.sleep(random.uniform(0.3, 0.5))
-
-    def switch_vscode_tabs(self):
-        """Switch between VSCode tabs using keyboard shortcuts"""
-        if not self.is_vscode_active():
-            return
-
-        # Randomly decide how many tabs to switch (1-3)
-        num_switches = random.randint(1, 3)
-        for _ in range(num_switches):
-            # Use Ctrl+Tab to switch to next tab
-            self.safe_action(lambda: pyautogui.hotkey('ctrl', 'tab'), fallback_delay=0.3)
-            time.sleep(random.uniform(0.2, 0.5))
-        
-        # Sometimes use Ctrl+Shift+Tab to go backwards
-        if random.random() < 0.3:  # 30% chance to go backwards
-            self.safe_action(lambda: pyautogui.hotkey('ctrl', 'shift', 'tab'), fallback_delay=0.3)
-            time.sleep(random.uniform(0.2, 0.5))
-
-    def switch_vscode_files(self):
-        """Switch between VSCode files using keyboard shortcuts"""
-        if not self.is_vscode_active():
-            return
-
-        # Open file switcher (Ctrl+P)
-        self.safe_action(lambda: pyautogui.hotkey('ctrl', 'p'), fallback_delay=0.3)
-        time.sleep(random.uniform(0.3, 0.5))
-
-    def safe_action(self, action_func, fallback_delay=0.5):
-        """Execute an action with comprehensive fail-safe protection"""
-        try:
-            action_func()
-            return True
-        except pyautogui.FailSafeException:
-            # Fail-safe triggered - move mouse to center and continue
-            try:
-                screen_width, screen_height = pyautogui.size()
-                center_x = screen_width // 2
-                center_y = screen_height // 2
-                pyautogui.moveTo(center_x, center_y, duration=0.1)
-                time.sleep(fallback_delay)
-            except:
-                time.sleep(fallback_delay)
-            return False
-        except Exception as e:
-            # Other exceptions - just wait
-            time.sleep(fallback_delay)
-            return False
-
-    def simulate_postman_activity(self):
-        """Simulate Postman-specific activity without scrolling"""
-        if not self.is_postman_active():
-            return
-
-        # Postman-specific activities that don't involve scrolling
-        activities = [
-            # Tab switching in Postman
-            lambda: pyautogui.hotkey('ctrl', 'tab'),
-            lambda: pyautogui.hotkey('ctrl', 'shift', 'tab'),
-            # Navigation
-            lambda: pyautogui.press('tab'),
-            lambda: pyautogui.press('enter'),
-            lambda: pyautogui.press('space'),
-            # Common Postman shortcuts
-            lambda: pyautogui.hotkey('ctrl', 's'),  # Save
-            lambda: pyautogui.hotkey('ctrl', 'r'),  # Send request
-            lambda: pyautogui.hotkey('ctrl', 'n'),  # New request
-            lambda: pyautogui.hotkey('ctrl', 'o'),  # Open
-            # Mouse clicks in safe areas
-            lambda: pyautogui.click(x=random.randint(150, 800), y=random.randint(150, 400)),
-            # Typing in safe areas
-            lambda: pyautogui.typewrite('test', interval=0.1),
-            lambda: pyautogui.typewrite('api', interval=0.1),
-            lambda: pyautogui.typewrite('endpoint', interval=0.1),
-        ]
-        
-        # Choose a random activity and execute safely
-        activity = random.choice(activities)
-        self.safe_action(activity, fallback_delay=0.3)
 
         # Code file specific search patterns - targeting both React/TypeScript and vanilla JS/HTML
         search_patterns = [
@@ -274,43 +176,7 @@ class Simulator:
             'header', 'footer', 'nav', 'sidebar', 'content', 'container',
             'button', 'input', 'form', 'modal', 'popup', 'card', 'list',
             
-            # PHP specific patterns
-            'class', 'function', 'namespace', 'use', 'require', 'include',
-            'public', 'private', 'protected', 'static', 'abstract', 'interface',
-            'trait', 'extends', 'implements', 'new', 'return', 'echo', 'print',
-            'isset', 'empty', 'unset', 'array', 'string', 'int', 'float', 'bool',
-            'null', 'true', 'false', 'try', 'catch', 'throw', 'finally',
-            'foreach', 'while', 'for', 'if', 'else', 'elseif', 'switch', 'case',
-            'default', 'break', 'continue', 'do', 'while', 'endwhile', 'endif',
-            'endforeach', 'endfor', 'endforeach', 'endswitch', 'enddeclare',
-            
-            # PHP file patterns
-            'index.php', 'config.php', 'database.php', 'functions.php',
-            'utils.php', 'helpers.php', 'classes.php', 'models.php',
-            'controllers.php', 'views.php', 'templates.php', 'api.php',
-            'auth.php', 'session.php', 'cookies.php', 'validation.php',
-            'form.php', 'mail.php', 'upload.php', 'download.php',
-            
-            # PHP framework patterns (Laravel, Symfony, CodeIgniter, etc.)
-            'app/', 'config/', 'database/', 'resources/', 'routes/',
-            'storage/', 'vendor/', 'public/', 'bootstrap/', 'tests/',
-            'migrations/', 'seeders/', 'factories/', 'providers/',
-            'middleware/', 'controllers/', 'models/', 'views/',
-            'layouts/', 'components/', 'partials/', 'templates/',
-            
-            # PHP Composer patterns
-            'composer.json', 'composer.lock', 'autoload.php', 'vendor/',
-            'psr-4', 'psr-0', 'require', 'require-dev', 'autoload',
-            
-            # Common PHP project patterns
-            'index.php', 'main.php', 'app.php', 'bootstrap.php',
-            'init.php', 'setup.php', 'config.php', 'database.php',
-            'connection.php', 'db.php', 'mysql.php', 'pdo.php',
-            'session.php', 'auth.php', 'login.php', 'register.php',
-            'profile.php', 'admin.php', 'dashboard.php', 'api.php',
-            'rest.php', 'ajax.php', 'cron.php', 'cli.php',
-            
-            # Common directory patterns for all project types
+            # Common directory patterns for both project types
             'src/', 'components/', 'pages/', 'js/', 'css/', 'styles/',
             'utils/', 'helpers/', 'lib/', 'api/', 'assets/', 'images/',
             'public/', 'static/', 'dist/', 'build/', 'node_modules/',
@@ -391,7 +257,7 @@ class Simulator:
         
         time.sleep(random.uniform(0.5, 1.0))
 
-        # Handle special cases for Chrome, Cursor, and VSCode
+        # Handle special cases for Chrome and Cursor
         if self.is_chrome_active():
             if random.random() < 0.7:  # 70% chance to switch tabs when Chrome is active
                 self.switch_chrome_tabs()
@@ -406,12 +272,7 @@ class Simulator:
                     self.switch_vscode_files()
     
     def simulate_scroll(self):
-        """Simulate natural scrolling behavior with fail-safe protection"""
-        # Skip scrolling in applications that might not handle it well
-        problematic_apps = ["Postman", "Slack", "Hubstaff", "Terminal", "Console", "Command Prompt"]
-        if any(app in self.current_window for app in problematic_apps):
-            return
-            
+        """Simulate natural scrolling behavior"""
         # More frequent small scrolls
         num_scrolls = random.randint(2, 5)  # Do multiple scrolls in sequence
         
@@ -425,12 +286,7 @@ class Simulator:
             # Split into smaller steps for smoother scrolling
             steps = random.randint(2, 4)
             for _ in range(steps):
-                success = self.safe_action(
-                    lambda: pyautogui.scroll(scroll_amount // steps),
-                    fallback_delay=0.1
-                )
-                if not success:
-                    break
+                pyautogui.scroll(scroll_amount // steps)
                 time.sleep(random.uniform(0.05, 0.15))  # Shorter delays between scrolls
             
             # Small pause between scroll sequences
@@ -440,13 +296,6 @@ class Simulator:
         """Simulate natural mouse movement with acceleration and deceleration"""
         start_x, start_y = pyautogui.position()
         
-        # Define safe screen boundaries (avoid corners)
-        safe_margin = 150  # Keep 150 pixels away from edges to avoid fail-safe
-        min_x = safe_margin
-        max_x = self.screen_width - safe_margin
-        min_y = safe_margin
-        max_y = self.screen_height - safe_margin
-        
         # Get window position if we have a current window
         if self.current_window:
             if self.platform == "Windows":
@@ -454,133 +303,36 @@ class Simulator:
                     hwnd = win32gui.FindWindow(None, self.current_window)
                     if hwnd:
                         rect = win32gui.GetWindowRect(hwnd)
-                        # Ensure window coordinates are within safe boundaries
-                        window_min_x = max(rect[0] + 100, min_x)
-                        window_max_x = min(rect[2] - 100, max_x)
-                        window_min_y = max(rect[1] + 100, min_y)
-                        window_max_y = min(rect[3] - 100, max_y)
-                        
-                        if window_max_x > window_min_x and window_max_y > window_min_y:
-                            end_x = random.randint(window_min_x, window_max_x)
-                            end_y = random.randint(window_min_y, window_max_y)
-                        else:
-                            end_x = random.randint(min_x, max_x)
-                            end_y = random.randint(min_y, max_y)
+                        end_x = random.randint(rect[0] + 100, rect[2] - 100)
+                        end_y = random.randint(rect[1] + 100, rect[3] - 100)
                     else:
-                        end_x = random.randint(min_x, max_x)
-                        end_y = random.randint(min_y, max_y)
+                        end_x = random.randint(0, self.screen_width)
+                        end_y = random.randint(0, self.screen_height)
                 except:
-                    end_x = random.randint(min_x, max_x)
-                    end_y = random.randint(min_y, max_y)
+                    end_x = random.randint(0, self.screen_width)
+                    end_y = random.randint(0, self.screen_height)
             else:
-                # Linux/Ubuntu: use safe screen coordinates
-                end_x = random.randint(min_x, max_x)
-                end_y = random.randint(min_y, max_y)
+                # Linux/Ubuntu: use screen coordinates for now
+                # Could be enhanced with xdotool window geometry if needed
+                end_x = random.randint(0, self.screen_width)
+                end_y = random.randint(0, self.screen_height)
         else:
-            end_x = random.randint(min_x, max_x)
-            end_y = random.randint(min_y, max_y)
+            end_x = random.randint(0, self.screen_width)
+            end_y = random.randint(0, self.screen_height)
         
         # Create a natural curve for the mouse movement with fewer steps for faster movement
         if self.platform != "Windows":
-            # Ubuntu: Multiple fallback methods for mouse movement
-            steps = random.randint(10, 15)
-            
-            # Method 1: Try xdotool with relative movement
-            try:
-                for i in range(steps):
-                    progress = i / steps
-                    ease = 0.5 - math.cos(progress * math.pi) / 2
-                    
-                    x = int(start_x + (end_x - start_x) * ease)
-                    y = int(start_y + (end_y - start_y) * ease)
-                    
-                    # Use xdotool with relative movement
-                    subprocess.run(['xdotool', 'mousemove_relative', str(x - start_x), str(y - start_y)], 
-                                 capture_output=True, check=False)
-                    time.sleep(random.uniform(0.05, 0.1))
-            except Exception:
-                # If this method fails, continue to next method
-                pass
-                    
-            except (subprocess.SubprocessError, FileNotFoundError):
-                # Method 2: Try xdotool with absolute coordinates
-                try:
-                    for i in range(steps):
-                        progress = i / steps
-                        ease = 0.5 - math.cos(progress * math.pi) / 2
-                        
-                        x = int(start_x + (end_x - start_x) * ease)
-                        y = int(start_y + (end_y - start_y) * ease)
-                        
-                        # Use xdotool with absolute coordinates
-                        subprocess.run(['xdotool', 'mousemove', str(x), str(y)], 
-                                     capture_output=True, check=False)
-                        time.sleep(random.uniform(0.05, 0.1))
-                        
-                except (subprocess.SubprocessError, FileNotFoundError):
-                    # Method 3: Try xte (part of xautomation)
-                    try:
-                        for i in range(steps):
-                            progress = i / steps
-                            ease = 0.5 - math.cos(progress * math.pi) / 2
-                            
-                            x = int(start_x + (end_x - start_x) * ease)
-                            y = int(start_y + (end_y - start_y) * ease)
-                            
-                            # Use xte for mouse movement
-                            subprocess.run(['xte', f'mousemove {x} {y}'], 
-                                         capture_output=True, check=False)
-                            time.sleep(random.uniform(0.05, 0.1))
-                            
-                    except (subprocess.SubprocessError, FileNotFoundError):
-                        # Method 4: Try pyautogui with longer duration
-                        try:
-                            steps = random.randint(15, 25)  # More steps for smoother movement
-                            for i in range(steps):
-                                progress = i / steps
-                                ease = 0.5 - math.cos(progress * math.pi) / 2
-                                
-                                x = start_x + (end_x - start_x) * ease
-                                y = start_y + (end_y - start_y) * ease
-                                
-                                success = self.safe_action(
-                                    lambda: pyautogui.moveTo(x, y, duration=0.05),
-                                    fallback_delay=0.1
-                                )
-                                if not success:
-                                    break
-                                time.sleep(random.uniform(0.02, 0.05))  # Longer delays for Ubuntu
-                                
-                        except Exception:
-                            # Method 5: Try pynput if available
-                            if PYNPUT_AVAILABLE:
-                                try:
-                                    controller = mouse.Controller()
-                                    for i in range(steps):
-                                        progress = i / steps
-                                        ease = 0.5 - math.cos(progress * math.pi) / 2
-                                        
-                                        x = int(start_x + (end_x - start_x) * ease)
-                                        y = int(start_y + (end_y - start_y) * ease)
-                                        
-                                        controller.position = (x, y)
-                                        time.sleep(random.uniform(0.05, 0.1))
-                                except Exception:
-                                    # Method 6: Fallback to simple click at random position
-                                    try:
-                                        pyautogui.click(x=end_x, y=end_y)
-                                        time.sleep(random.uniform(0.1, 0.3))
-                                    except Exception:
-                                        # Last resort: just wait
-                                        time.sleep(random.uniform(0.5, 1.0))
-                            else:
-                                # Method 6: Fallback to simple click at random position
-                                try:
-                                    pyautogui.click(x=end_x, y=end_y)
-                                    time.sleep(random.uniform(0.1, 0.3))
-                                except Exception:
-                                    # Last resort: just wait
-                                    time.sleep(random.uniform(0.5, 1.0))
+            # Ubuntu: More visible mouse movement with longer duration
+            steps = random.randint(15, 25)  # More steps for smoother movement
+            for i in range(steps):
+                progress = i / steps
+                ease = 0.5 - math.cos(progress * math.pi) / 2
+                
+                x = start_x + (end_x - start_x) * ease
+                y = start_y + (end_y - start_y) * ease
+                
+                pyautogui.moveTo(x, y, duration=0.02)  # Longer duration for Ubuntu
+                time.sleep(random.uniform(0.01, 0.03))  # Longer delays for Ubuntu
         else:
             # Windows: Faster movement
             steps = random.randint(10, 20)  # Reduced from 20-40 to 10-20
@@ -591,27 +343,20 @@ class Simulator:
                 x = start_x + (end_x - start_x) * ease
                 y = start_y + (end_y - start_y) * ease
                 
-                success = self.safe_action(
-                    lambda: pyautogui.moveTo(x, y, duration=0.005),
-                    fallback_delay=0.1
-                )
-                if not success:
-                    break
+                pyautogui.moveTo(x, y, duration=0.005)  # Reduced from 0.01 to 0.005
                 time.sleep(random.uniform(0.001, 0.005))  # Reduced from 0.01-0.03 to 0.001-0.005
     
     def delete_last_written_code(self):
         """Delete the last written code pattern by pressing backspace for each character"""
         # Press backspace for each character in the pattern
         for _ in range(len(self.last_written_pattern)):
-            success = self.safe_action(lambda: pyautogui.press('backspace'), fallback_delay=0.1)
-            if not success:
-                break
+            pyautogui.press('backspace')
             time.sleep(random.uniform(0.05, 0.15))
 
     def simulate_coding_activity(self):
         """Simulate coding-like behavior without actually modifying code"""
-        # Only proceed if Cursor IDE or VSCode is active
-        if not (self.is_cursor_ide_active() or self.is_vscode_active()):
+        # Only proceed if Cursor IDE is active
+        if not self.is_cursor_ide_active():
             return
 
         # Code patterns for both React/TypeScript and vanilla JavaScript/HTML development
@@ -1175,9 +920,7 @@ class Simulator:
         pattern = random.choice(patterns)
         self.last_written_pattern = pattern  # Store the pattern for deletion
         for char in pattern:
-            success = self.safe_action(lambda: pyautogui.press(char), fallback_delay=0.1)
-            if not success:
-                break
+            pyautogui.press(char)
             time.sleep(random.uniform(0.05, 0.15))
         
         # Always delete what we typed
@@ -1206,78 +949,37 @@ class Simulator:
             if random.random() < 0.1:
                 self.update_window_list()
             
-            # Ensure at least 65% action rate by adjusting probabilities
-            action_performed = False
-            
             # Switch windows more frequently
-            if random.random() < 0.5:  # Increased from 40% to 50% chance to switch windows
+            if random.random() < 0.4:  # 40% chance to switch windows
                 self.switch_window()
-                action_performed = True
             # Additional tab/file switching without window switch
-            elif self.is_chrome_active() and random.random() < 0.4:  # Increased from 30% to 40% chance to switch tabs
+            elif self.is_chrome_active() and random.random() < 0.3:  # 30% chance to switch tabs
                 self.switch_chrome_tabs()
-                action_performed = True
-            elif self.is_cursor_ide_active() and random.random() < 0.4:  # Increased from 30% to 40% chance to switch files
+            elif self.is_cursor_ide_active() and random.random() < 0.3:  # 30% chance to switch files
                 self.switch_cursor_files()
-                action_performed = True
-            elif self.is_vscode_active() and random.random() < 0.4:  # Increased from 30% to 40% chance to switch tabs/files
-                if random.random() < 0.7:  # 70% chance for tab switching, 30% for file switching
-                    self.switch_vscode_tabs()
-                else:
-                    self.switch_vscode_files()
-                action_performed = True
-            elif self.is_postman_active() and random.random() < 0.5:  # 50% chance for Postman activity
-                self.simulate_postman_activity()
-                action_performed = True
             
-            # Choose activity with guaranteed 65%+ action rate
-            if not action_performed:  # If no window/tab switching occurred, ensure other actions
-                activity = random.random()
-                if activity < 0.45:  # 45% chance for scrolling
-                    self.simulate_scroll()
-                elif activity < 0.7:  # 25% chance for mouse movement
-                    self.natural_mouse_movement()
-                elif activity < 0.85:  # 15% chance for coding activity
-                    self.simulate_coding_activity()
-                elif activity < 0.95:  # 10% chance for Postman activity (if active)
-                    if self.is_postman_active():
-                        self.simulate_postman_activity()
-                    else:
-                        pyautogui.click()
-                else:  # 5% chance for clicking
-                    self.safe_action(lambda: pyautogui.click(), fallback_delay=0.2)
-            else:
-                # Even if window/tab switching occurred, still do other activities sometimes
-                if random.random() < 0.3:  # 30% chance for additional activity
-                    activity = random.random()
-                    if activity < 0.4:  # 40% chance for scrolling
-                        self.simulate_scroll()
-                    elif activity < 0.7:  # 30% chance for mouse movement
-                        self.natural_mouse_movement()
-                    elif activity < 0.85:  # 15% chance for coding activity
-                        self.simulate_coding_activity()
-                    elif activity < 0.95:  # 10% chance for Postman activity (if active)
-                        if self.is_postman_active():
-                            self.simulate_postman_activity()
-                        else:
-                            pyautogui.click()
-                    else:  # 5% chance for clicking
-                        self.safe_action(lambda: pyautogui.click(), fallback_delay=0.2)
+            # Choose activity with increased scroll probability
+            activity = random.random()
+            if activity < 0.4:  # 40% chance for scrolling
+                self.simulate_scroll()
+            elif activity < 0.6:  # 20% chance for mouse movement (increased for Ubuntu)
+                self.natural_mouse_movement()
+            elif activity < 0.75:  # 15% chance for coding activity
+                self.simulate_coding_activity()
+            else:  # 25% chance for clicking (increased for Ubuntu)
+                pyautogui.click()
             
             # Update activity level
             self.update_activity_level()
             
-            # Take shorter breaks less frequently to maintain 65%+ activity rate
-            if random.random() < 0.02:  # Reduced from 0.03 to 0.02 for even less frequent breaks
+            # Take shorter breaks less frequently
+            if random.random() < 0.03:  # Reduced from 0.05 to 0.03 for less frequent breaks
                 self.simulate_break()
             
-            # Consistent delays between actions to maintain 65%+ activity rate
-            time.sleep(random.uniform(0.05, 0.3))  # Reduced from 0.1-0.5 to 0.05-0.3 for more frequent actions
+            # Shorter delays between actions
+            time.sleep(random.uniform(0.1, 0.5))  # Reduced from 0.2-1.0 to 0.1-0.5
 
 if __name__ == "__main__":
-    
-    # Optionally disable fail-safe (not recommended but can be useful for testing)
-    # pyautogui.FAILSAFE = False
     
     simulator = Simulator()
     try:
@@ -1295,6 +997,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Simulation error: {e}")
         print("If you're getting frequent fail-safe exceptions, you can:")
-        print("1. Uncomment the line 'pyautogui.FAILSAFE = False' above (not recommended)")
-        print("2. Keep your mouse away from screen corners during simulation")
-        print("3. The simulator now has built-in protection against fail-safe triggers") 
+        print("1. Keep your mouse away from screen corners during simulation")
+        print("2. The simulator will automatically recover from fail-safe triggers") 
