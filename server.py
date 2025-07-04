@@ -44,7 +44,8 @@ class Simulator:
                         "registry editor", "system configuration", "windows security",
                         "device manager", "event viewer", "services", "computer management",
                         "microsoft management console", "windows powershell", "command prompt",
-                        "cortana", "search", "start", "taskbar", "notification area"
+                        "cortana", "search", "start", "taskbar", "notification area",
+                        "slack", "hubstaff"
                     ]):
                         windows.append((hwnd, title))
                 return True
@@ -69,7 +70,8 @@ class Simulator:
                                 if title and not any(keyword in title.lower() for keyword in [
                                     "desktop", "panel", "dock", "launcher", "notification",
                                     "system settings", "ubuntu software", "software updater",
-                                    "terminal", "gnome-terminal", "konsole", "xfce4-terminal"
+                                    "terminal", "gnome-terminal", "konsole", "xfce4-terminal",
+                                    "slack", "hubstaff"
                                 ]):
                                     self.window_list.append((window_id, title))
             except (subprocess.SubprocessError, FileNotFoundError):
@@ -88,7 +90,8 @@ class Simulator:
                                         if title and not any(keyword in title.lower() for keyword in [
                                             "desktop", "panel", "dock", "launcher", "notification",
                                             "system settings", "ubuntu software", "software updater",
-                                            "terminal", "gnome-terminal", "konsole", "xfce4-terminal"
+                                            "terminal", "gnome-terminal", "konsole", "xfce4-terminal",
+                                            "slack", "hubstaff"
                                         ]):
                                             self.window_list.append((window_id, title))
                                 except:
@@ -262,7 +265,11 @@ class Simulator:
         
         for _ in range(num_scrolls):
             # Smaller scroll amounts for more natural movement
-            scroll_amount = random.randint(-100, 100)
+            # Reduce scroll amount on Ubuntu for slower scrolling
+            if self.platform != "Windows":
+                scroll_amount = random.randint(-50, 50)  # Reduced from -100, 100
+            else:
+                scroll_amount = random.randint(-100, 100)
             # Split into smaller steps for smoother scrolling
             steps = random.randint(2, 4)
             for _ in range(steps):
