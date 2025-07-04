@@ -313,17 +313,34 @@ class Simulator:
         
         # Create a natural curve for the mouse movement with fewer steps for faster movement
         if self.platform != "Windows":
-            # Ubuntu: More visible mouse movement with longer duration
-            steps = random.randint(15, 25)  # More steps for smoother movement
-            for i in range(steps):
-                progress = i / steps
-                ease = 0.5 - math.cos(progress * math.pi) / 2
-                
-                x = start_x + (end_x - start_x) * ease
-                y = start_y + (end_y - start_y) * ease
-                
-                pyautogui.moveTo(x, y, duration=0.02)  # Longer duration for Ubuntu
-                time.sleep(random.uniform(0.01, 0.03))  # Longer delays for Ubuntu
+            # Ubuntu: Try xdotool first, fallback to pyautogui
+            try:
+                # Use xdotool for more reliable mouse movement on Ubuntu
+                steps = random.randint(10, 15)
+                for i in range(steps):
+                    progress = i / steps
+                    ease = 0.5 - math.cos(progress * math.pi) / 2
+                    
+                    x = int(start_x + (end_x - start_x) * ease)
+                    y = int(start_y + (end_y - start_y) * ease)
+                    
+                    # Use xdotool for mouse movement
+                    subprocess.run(['xdotool', 'mousemove', str(x), str(y)], 
+                                 capture_output=True, check=False)
+                    time.sleep(random.uniform(0.05, 0.1))
+                    
+            except (subprocess.SubprocessError, FileNotFoundError):
+                # Fallback to pyautogui if xdotool is not available
+                steps = random.randint(15, 25)  # More steps for smoother movement
+                for i in range(steps):
+                    progress = i / steps
+                    ease = 0.5 - math.cos(progress * math.pi) / 2
+                    
+                    x = start_x + (end_x - start_x) * ease
+                    y = start_y + (end_y - start_y) * ease
+                    
+                    pyautogui.moveTo(x, y, duration=0.02)  # Longer duration for Ubuntu
+                    time.sleep(random.uniform(0.01, 0.03))  # Longer delays for Ubuntu
         else:
             # Windows: Faster movement
             steps = random.randint(10, 20)  # Reduced from 20-40 to 10-20

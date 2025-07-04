@@ -3,4 +3,5 @@ psutil==5.9.5
 
 # Platform-specific dependencies
 # For Windows: pip install pywin32==307
-# For Ubuntu: sudo apt-get install wmctrl xdotool 
+# For Ubuntu: sudo apt-get install wmctrl xdotool python3-tk python3-dev
+# For Ubuntu mouse movement: sudo apt-get install python3-xlib 
