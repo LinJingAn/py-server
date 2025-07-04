@@ -1143,15 +1143,15 @@ class Simulator:
             elif self.is_vscode_active() and random.random() < 0.2:  # 20% chance to switch files
                 self.switch_vscode_files()
             
-            # Choose activity with increased scroll probability
+            # Choose activity with specified distribution
             activity = random.random()
-            if activity < 0.4:  # 40% chance for scrolling
+            if activity < 0.20:  # 20% chance for scrolling
                 self.simulate_scroll()
-            elif activity < 0.6:  # 20% chance for mouse movement (increased for Ubuntu)
+            elif activity < 0.40:  # 20% chance for mouse movement
                 self.natural_mouse_movement()
-            elif activity < 0.75:  # 15% chance for coding activity
+            elif activity < 0.80:  # 40% chance for coding activity
                 self.simulate_coding_activity()
-            else:  # 25% chance for clicking (increased for Ubuntu)
+            else:  # 20% chance for clicking
                 pyautogui.click()
             
             # Update activity level
