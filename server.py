@@ -448,11 +448,19 @@ class Simulator:
         num_scrolls = random.randint(2, 5)  # Do multiple scrolls in sequence
         
         for _ in range(num_scrolls):
+            # Check if we're in a code editor (VS Code or Cursor)
+            is_code_editor = self.is_vscode_active() or self.is_cursor_ide_active()
+            
             # Check if we're near the bottom and should scroll up
             if self.scroll_position >= self.scroll_threshold:
-                # Scroll up a little bit to simulate natural behavior
-                scroll_amount = random.randint(-50, -20)  # Scroll up
-                self.scroll_position = max(0, self.scroll_position + scroll_amount)
+                if is_code_editor:
+                    # In code editors, scroll up more to ensure code is visible
+                    scroll_amount = random.randint(-80, -40)  # Scroll up more for code visibility
+                    self.scroll_position = max(0, self.scroll_position + scroll_amount)
+                else:
+                    # In other applications, normal scroll up behavior
+                    scroll_amount = random.randint(-50, -20)  # Scroll up
+                    self.scroll_position = max(0, self.scroll_position + scroll_amount)
             else:
                 # Normal scrolling behavior
                 # Smaller scroll amounts for more natural movement
