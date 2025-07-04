@@ -1,0 +1,6 @@
+pyautogui==0.9.54
+psutil==5.9.5
+
+# Platform-specific dependencies
+# For Windows: pip install pywin32==307
+# For Ubuntu: sudo apt-get install wmctrl xdotool 
