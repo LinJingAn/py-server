@@ -112,6 +112,12 @@ class Simulator:
             return False
         return "Cursor" in self.current_window
 
+    def is_vscode_active(self):
+        """Check if Visual Studio Code is the active window"""
+        if not self.current_window:
+            return False
+        return "Visual Studio Code" in self.current_window or "Code" in self.current_window
+
     def switch_chrome_tabs(self):
         """Switch between Chrome tabs using keyboard shortcuts"""
         if not self.is_chrome_active():
@@ -176,7 +182,43 @@ class Simulator:
             'header', 'footer', 'nav', 'sidebar', 'content', 'container',
             'button', 'input', 'form', 'modal', 'popup', 'card', 'list',
             
-            # Common directory patterns for both project types
+            # PHP specific patterns
+            'class', 'function', 'namespace', 'use', 'require', 'include',
+            'public', 'private', 'protected', 'static', 'abstract', 'interface',
+            'trait', 'extends', 'implements', 'new', 'return', 'echo', 'print',
+            'isset', 'empty', 'unset', 'array', 'string', 'int', 'float', 'bool',
+            'null', 'true', 'false', 'try', 'catch', 'throw', 'finally',
+            'foreach', 'while', 'for', 'if', 'else', 'elseif', 'switch', 'case',
+            'default', 'break', 'continue', 'do', 'while', 'endwhile', 'endif',
+            'endforeach', 'endfor', 'endforeach', 'endswitch', 'enddeclare',
+            
+            # PHP file patterns
+            'index.php', 'config.php', 'database.php', 'functions.php',
+            'utils.php', 'helpers.php', 'classes.php', 'models.php',
+            'controllers.php', 'views.php', 'templates.php', 'api.php',
+            'auth.php', 'session.php', 'cookies.php', 'validation.php',
+            'form.php', 'mail.php', 'upload.php', 'download.php',
+            
+            # PHP framework patterns (Laravel, Symfony, CodeIgniter, etc.)
+            'app/', 'config/', 'database/', 'resources/', 'routes/',
+            'storage/', 'vendor/', 'public/', 'bootstrap/', 'tests/',
+            'migrations/', 'seeders/', 'factories/', 'providers/',
+            'middleware/', 'controllers/', 'models/', 'views/',
+            'layouts/', 'components/', 'partials/', 'templates/',
+            
+            # PHP Composer patterns
+            'composer.json', 'composer.lock', 'autoload.php', 'vendor/',
+            'psr-4', 'psr-0', 'require', 'require-dev', 'autoload',
+            
+            # Common PHP project patterns
+            'index.php', 'main.php', 'app.php', 'bootstrap.php',
+            'init.php', 'setup.php', 'config.php', 'database.php',
+            'connection.php', 'db.php', 'mysql.php', 'pdo.php',
+            'session.php', 'auth.php', 'login.php', 'register.php',
+            'profile.php', 'admin.php', 'dashboard.php', 'api.php',
+            'rest.php', 'ajax.php', 'cron.php', 'cli.php',
+            
+            # Common directory patterns for all project types
             'src/', 'components/', 'pages/', 'js/', 'css/', 'styles/',
             'utils/', 'helpers/', 'lib/', 'api/', 'assets/', 'images/',
             'public/', 'static/', 'dist/', 'build/', 'node_modules/',
@@ -194,6 +236,130 @@ class Simulator:
             'dom.js', 'events.js', 'storage.js', 'cookies.js',
             
             # Common HTML project patterns
+            'index.html', 'main.html', 'template.html', 'base.html',
+            'header.html', 'footer.html', 'nav.html', 'sidebar.html',
+        ]
+        
+        # Type 1-2 search patterns (reduced to avoid too long searches)
+        num_patterns = random.randint(1, 2)
+        for _ in range(num_patterns):
+            pattern = random.choice(search_patterns)
+            for char in pattern:
+                pyautogui.press(char)
+                time.sleep(random.uniform(0.05, 0.15))
+            time.sleep(random.uniform(0.2, 0.4))
+
+        # Sometimes use arrow keys to navigate through results
+        if random.random() < 0.4:  # Increased chance to navigate
+            num_arrows = random.randint(1, 3)
+            for _ in range(num_arrows):
+                pyautogui.press('down')
+                time.sleep(random.uniform(0.1, 0.2))
+
+        # Press Enter to select the file
+        pyautogui.press('enter')
+        time.sleep(random.uniform(0.2, 0.4))
+
+    def switch_vscode_tabs(self):
+        """Switch between VS Code tabs using keyboard shortcuts"""
+        if not self.is_vscode_active():
+            return
+
+        # Randomly decide how many tabs to switch (1-3)
+        num_switches = random.randint(1, 3)
+        for _ in range(num_switches):
+            # Use Ctrl+Tab to switch to next tab in VS Code
+            pyautogui.hotkey('ctrl', 'tab')
+            # Slower tab switching on Ubuntu
+            if self.platform != "Windows":
+                time.sleep(random.uniform(0.4, 0.8))  # Increased delay for Ubuntu
+            else:
+                time.sleep(random.uniform(0.2, 0.5))
+
+    def switch_vscode_files(self):
+        """Switch between VS Code files using keyboard shortcuts"""
+        if not self.is_vscode_active():
+            return
+
+        # Open file switcher in VS Code (Ctrl+P)
+        pyautogui.hotkey('ctrl', 'p')
+        time.sleep(random.uniform(0.3, 0.5))
+
+        # VS Code file search patterns - targeting common development files
+        search_patterns = [
+            # File extensions for various programming languages
+            '.tsx', '.jsx', '.ts', '.js', '.html', '.css', '.scss', '.sass',
+            '.php', '.phtml', '.py', '.java', '.cpp', '.c', '.cs', '.go',
+            '.rs', '.rb', '.swift', '.kt', '.scala', '.clj', '.hs', '.ml',
+            '.sql', '.json', '.xml', '.yaml', '.yml', '.toml', '.ini',
+            '.md', '.txt', '.log', '.sh', '.bat', '.ps1', '.dockerfile',
+            
+            # React/TypeScript specific patterns
+            'use', 'get', 'set', 'handle', 'create', 'fetch', 'update', 'delete',
+            'Button', 'Modal', 'Form', 'Input', 'Card', 'Header', 'Footer', 'Nav',
+            'Layout', 'Page', 'Component', 'Hook', 'Context', 'Provider',
+            'page', 'layout', 'component', 'hook', 'util', 'service', 'api',
+            'store', 'reducer', 'action', 'selector', 'middleware', 'config',
+            'index.tsx', 'index.jsx', 'App.tsx', 'App.jsx',
+            'layout.tsx', 'page.tsx', 'loading.tsx', 'types.ts',
+            
+            # Common file patterns
+            'main', 'app', 'index', 'utils', 'helpers', 'functions',
+            'validation', 'form', 'modal', 'popup', 'menu', 'nav', 'header', 'footer',
+            'sidebar', 'content', 'container', 'wrapper', 'section', 'article',
+            'button', 'input', 'select', 'textarea', 'label', 'div', 'span',
+            'table', 'list', 'item', 'card', 'box', 'panel', 'dialog',
+            
+            # Common function patterns
+            'init', 'setup', 'load', 'save', 'export', 'import', 'render',
+            'calculate', 'process', 'validate', 'format', 'parse', 'convert',
+            'filter', 'sort', 'search', 'find', 'add', 'remove', 'update',
+            'show', 'hide', 'toggle', 'open', 'close', 'start', 'stop',
+            
+            # HTML structure patterns
+            'index.html', 'main.html', 'template.html', 'base.html',
+            'head', 'body', 'header', 'footer', 'nav', 'main', 'aside',
+            'section', 'article', 'div', 'span', 'p', 'h1', 'h2', 'h3',
+            
+            # CSS/SCSS patterns
+            'style', 'styles', 'css', 'scss', 'sass', 'theme', 'variables',
+            'layout', 'grid', 'flex', 'responsive', 'mobile', 'desktop',
+            'header', 'footer', 'nav', 'sidebar', 'content', 'container',
+            'button', 'input', 'form', 'modal', 'popup', 'card', 'list',
+            
+            # Python patterns
+            'main.py', 'app.py', 'config.py', 'settings.py', 'utils.py',
+            'helpers.py', 'models.py', 'views.py', 'controllers.py',
+            'routes.py', 'api.py', 'auth.py', 'database.py', 'db.py',
+            'test_', 'tests/', 'test/', '__init__.py', 'requirements.txt',
+            
+            # Java patterns
+            'Main.java', 'App.java', 'Controller.java', 'Service.java',
+            'Repository.java', 'Model.java', 'Entity.java', 'Config.java',
+            'Application.java', 'Test.java', 'pom.xml', 'build.gradle',
+            
+            # C/C++ patterns
+            'main.c', 'main.cpp', 'app.c', 'app.cpp', 'utils.c', 'utils.cpp',
+            'header.h', 'config.h', 'CMakeLists.txt', 'Makefile',
+            
+            # Common directory patterns
+            'src/', 'components/', 'pages/', 'js/', 'css/', 'styles/',
+            'utils/', 'helpers/', 'lib/', 'api/', 'assets/', 'images/',
+            'public/', 'static/', 'dist/', 'build/', 'node_modules/',
+            'includes/', 'classes/', 'functions/', 'templates/',
+            
+            # Project configuration files
+            'package.json', 'package-lock.json', 'yarn.lock', 'webpack.config',
+            'vite.config', 'rollup.config', 'babel.config', 'eslint.config',
+            'tsconfig.json', 'jsconfig.json', '.env', '.gitignore',
+            'composer.json', 'composer.lock', 'phpunit.xml', '.htaccess',
+            'requirements.txt', 'setup.py', 'pyproject.toml', 'Pipfile',
+            'pom.xml', 'build.gradle', 'CMakeLists.txt', 'Makefile',
+            
+            # Common file names
+            'app.js', 'main.js', 'index.js', 'script.js', 'utils.js',
+            'functions.js', 'helpers.js', 'validation.js', 'api.js',
+            'dom.js', 'events.js', 'storage.js', 'cookies.js',
             'index.html', 'main.html', 'template.html', 'base.html',
             'header.html', 'footer.html', 'nav.html', 'sidebar.html',
         ]
@@ -257,7 +423,7 @@ class Simulator:
         
         time.sleep(random.uniform(0.5, 1.0))
 
-        # Handle special cases for Chrome and Cursor
+        # Handle special cases for Chrome, Cursor, and VS Code
         if self.is_chrome_active():
             if random.random() < 0.7:  # 70% chance to switch tabs when Chrome is active
                 self.switch_chrome_tabs()
@@ -265,11 +431,10 @@ class Simulator:
             if random.random() < 0.6:  # 60% chance to switch files when Cursor is active
                 self.switch_cursor_files()
         elif self.is_vscode_active():
-            if random.random() < 0.6:  # 60% chance to switch tabs/files when VSCode is active
-                if random.random() < 0.7:  # 70% chance for tab switching, 30% for file switching
-                    self.switch_vscode_tabs()
-                else:
-                    self.switch_vscode_files()
+            if random.random() < 0.6:  # 60% chance to switch tabs when VS Code is active
+                self.switch_vscode_tabs()
+            elif random.random() < 0.4:  # 40% chance to switch files when VS Code is active
+                self.switch_vscode_files()
     
     def simulate_scroll(self):
         """Simulate natural scrolling behavior"""
@@ -957,6 +1122,10 @@ class Simulator:
                 self.switch_chrome_tabs()
             elif self.is_cursor_ide_active() and random.random() < 0.3:  # 30% chance to switch files
                 self.switch_cursor_files()
+            elif self.is_vscode_active() and random.random() < 0.3:  # 30% chance to switch tabs
+                self.switch_vscode_tabs()
+            elif self.is_vscode_active() and random.random() < 0.2:  # 20% chance to switch files
+                self.switch_vscode_files()
             
             # Choose activity with increased scroll probability
             activity = random.random()
