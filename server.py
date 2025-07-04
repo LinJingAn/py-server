@@ -122,7 +122,11 @@ class Simulator:
         for _ in range(num_switches):
             # Use Ctrl+Tab to switch to next tab
             pyautogui.hotkey('ctrl', 'tab')
-            time.sleep(random.uniform(0.2, 0.5))
+            # Slower tab switching on Ubuntu
+            if self.platform != "Windows":
+                time.sleep(random.uniform(0.4, 0.8))  # Increased delay for Ubuntu
+            else:
+                time.sleep(random.uniform(0.2, 0.5))
 
     def switch_cursor_files(self):
         """Switch between Cursor files using keyboard shortcuts"""
