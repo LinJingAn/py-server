@@ -533,25 +533,25 @@ class Simulator:
                             time.sleep(random.uniform(0.05, 0.1))
                             
                     except (subprocess.SubprocessError, FileNotFoundError):
-                                    # Method 4: Try pyautogui with longer duration
-            try:
-                steps = random.randint(15, 25)  # More steps for smoother movement
-                for i in range(steps):
-                    progress = i / steps
-                    ease = 0.5 - math.cos(progress * math.pi) / 2
-                    
-                    x = start_x + (end_x - start_x) * ease
-                    y = start_y + (end_y - start_y) * ease
-                    
-                    success = self.safe_action(
-                        lambda: pyautogui.moveTo(x, y, duration=0.05),
-                        fallback_delay=0.1
-                    )
-                    if not success:
-                        break
-                    time.sleep(random.uniform(0.02, 0.05))  # Longer delays for Ubuntu
-                    
-            except Exception:
+                        # Method 4: Try pyautogui with longer duration
+                        try:
+                            steps = random.randint(15, 25)  # More steps for smoother movement
+                            for i in range(steps):
+                                progress = i / steps
+                                ease = 0.5 - math.cos(progress * math.pi) / 2
+                                
+                                x = start_x + (end_x - start_x) * ease
+                                y = start_y + (end_y - start_y) * ease
+                                
+                                success = self.safe_action(
+                                    lambda: pyautogui.moveTo(x, y, duration=0.05),
+                                    fallback_delay=0.1
+                                )
+                                if not success:
+                                    break
+                                time.sleep(random.uniform(0.02, 0.05))  # Longer delays for Ubuntu
+                                
+                        except Exception:
                             # Method 5: Try pynput if available
                             if PYNPUT_AVAILABLE:
                                 try:
