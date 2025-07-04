@@ -21,7 +21,7 @@ else:
 pyautogui.FAILSAFE = True
 
 class Simulator:
-    def __init__(self):
+    def __init__(self, tech_stack="php"):
         self.screen_width, self.screen_height = pyautogui.size()
         self.last_activity_time = datetime.now()
         self.activity_level = 0.0  # 0.0 to 1.0
@@ -33,6 +33,9 @@ class Simulator:
         self.scroll_position = 0  # 0 = top, positive = scrolled down
         self.max_scroll_position = 1000  # Arbitrary max scroll position
         self.scroll_threshold = 800  # When to start scrolling up
+        
+        # Tech stack configuration
+        self.tech_stack = tech_stack.lower()
         
         self.update_window_list()
         
@@ -105,6 +108,468 @@ class Simulator:
                 except (subprocess.SubprocessError, FileNotFoundError):
                     # If no window management tools are available, create a basic list
                     self.window_list = [("default", "Default Window")]
+
+    def get_search_patterns(self):
+        """Get search patterns based on the configured tech stack"""
+        if self.tech_stack == "php":
+            return [
+                # PHP file extensions
+                '.php', '.phtml', '.phar', '.inc',
+                
+                # PHP framework patterns (Laravel, Symfony, CodeIgniter, etc.)
+                'app/', 'config/', 'database/', 'resources/', 'routes/',
+                'storage/', 'vendor/', 'public/', 'bootstrap/', 'tests/',
+                'migrations/', 'seeders/', 'factories/', 'providers/',
+                'middleware/', 'controllers/', 'models/', 'views/',
+                'layouts/', 'components/', 'partials/', 'templates/',
+                
+                # PHP Composer patterns
+                'composer.json', 'composer.lock', 'autoload.php', 'vendor/',
+                'psr-4', 'psr-0', 'require', 'require-dev', 'autoload',
+                
+                # Common PHP project patterns
+                'index.php', 'main.php', 'app.php', 'bootstrap.php',
+                'init.php', 'setup.php', 'config.php', 'database.php',
+                'connection.php', 'db.php', 'mysql.php', 'pdo.php',
+                'session.php', 'auth.php', 'login.php', 'register.php',
+                'profile.php', 'admin.php', 'dashboard.php', 'api.php',
+                'rest.php', 'ajax.php', 'cron.php', 'cli.php',
+                
+                # PHP class and function patterns
+                'class', 'function', 'namespace', 'use', 'require', 'include',
+                'public', 'private', 'protected', 'static', 'abstract', 'interface',
+                'trait', 'extends', 'implements', 'new', 'return', 'echo', 'print',
+                'isset', 'empty', 'unset', 'array', 'string', 'int', 'float', 'bool',
+                'null', 'true', 'false', 'try', 'catch', 'throw', 'finally',
+                'foreach', 'while', 'for', 'if', 'else', 'elseif', 'switch', 'case',
+                'default', 'break', 'continue', 'do', 'while', 'endwhile', 'endif',
+                'endforeach', 'endfor', 'endforeach', 'endswitch', 'enddeclare',
+                
+                # PHP file patterns
+                'index.php', 'config.php', 'database.php', 'functions.php',
+                'utils.php', 'helpers.php', 'classes.php', 'models.php',
+                'controllers.php', 'views.php', 'templates.php', 'api.php',
+                'auth.php', 'session.php', 'cookies.php', 'validation.php',
+                'form.php', 'mail.php', 'upload.php', 'download.php',
+                
+                # Common PHP project directories
+                'includes/', 'classes/', 'functions/', 'templates/',
+                'public/', 'static/', 'assets/', 'images/', 'uploads/',
+                'logs/', 'cache/', 'temp/', 'backup/', 'docs/',
+                
+                # PHP configuration files
+                'composer.json', 'composer.lock', 'phpunit.xml', '.htaccess',
+                '.env', '.gitignore', 'php.ini', 'apache.conf', 'nginx.conf',
+                
+                # PHP testing patterns
+                'test', 'tests/', 'phpunit', 'TestCase', 'Feature', 'Unit',
+                'test_', 'Test.php', 'TestCase.php', 'FeatureTest.php',
+                
+                # PHP common function names
+                'init', 'setup', 'load', 'save', 'create', 'update', 'delete',
+                'validate', 'format', 'parse', 'convert', 'filter', 'sort',
+                'search', 'find', 'add', 'remove', 'show', 'hide', 'toggle',
+                'open', 'close', 'start', 'stop', 'connect', 'disconnect',
+                
+                # PHP database patterns
+                'database', 'db', 'mysql', 'pdo', 'query', 'select', 'insert',
+                'update', 'delete', 'where', 'order', 'group', 'join', 'table',
+                'migration', 'seeder', 'model', 'repository', 'connection',
+                
+                # PHP web patterns
+                'controller', 'action', 'route', 'request', 'response', 'session',
+                'cookie', 'header', 'redirect', 'view', 'template', 'layout',
+                'form', 'input', 'validation', 'upload', 'download', 'api',
+            ]
+        
+        elif self.tech_stack == "react":
+            return [
+                # React/TypeScript file extensions
+                '.tsx', '.jsx', '.ts', '.js', '.html', '.css', '.scss', '.sass',
+                
+                # React/TypeScript specific patterns
+                'use', 'get', 'set', 'handle', 'create', 'fetch', 'update', 'delete',
+                'Button', 'Modal', 'Form', 'Input', 'Card', 'Header', 'Footer', 'Nav',
+                'Layout', 'Page', 'Component', 'Hook', 'Context', 'Provider',
+                'page', 'layout', 'component', 'hook', 'util', 'service', 'api',
+                'store', 'reducer', 'action', 'selector', 'middleware', 'config',
+                'index.tsx', 'index.jsx', 'App.tsx', 'App.jsx',
+                'layout.tsx', 'page.tsx', 'loading.tsx', 'types.ts',
+                
+                # Common React patterns
+                'main', 'app', 'index', 'utils', 'helpers', 'functions',
+                'validation', 'form', 'modal', 'popup', 'menu', 'nav', 'header', 'footer',
+                'sidebar', 'content', 'container', 'wrapper', 'section', 'article',
+                'button', 'input', 'select', 'textarea', 'label', 'div', 'span',
+                'table', 'list', 'item', 'card', 'box', 'panel', 'dialog',
+                
+                # React function patterns
+                'init', 'setup', 'load', 'save', 'export', 'import', 'render',
+                'calculate', 'process', 'validate', 'format', 'parse', 'convert',
+                'filter', 'sort', 'search', 'find', 'add', 'remove', 'update',
+                'show', 'hide', 'toggle', 'open', 'close', 'start', 'stop',
+                
+                # React directory patterns
+                'src/', 'components/', 'pages/', 'js/', 'css/', 'styles/',
+                'utils/', 'helpers/', 'lib/', 'api/', 'assets/', 'images/',
+                'public/', 'static/', 'dist/', 'build/', 'node_modules/',
+                
+                # React configuration files
+                'package.json', 'package-lock.json', 'yarn.lock', 'webpack.config',
+                'vite.config', 'rollup.config', 'babel.config', 'eslint.config',
+                'tsconfig.json', 'jsconfig.json', '.env', '.gitignore',
+                
+                # React common file names
+                'app.js', 'main.js', 'index.js', 'script.js', 'utils.js',
+                'functions.js', 'helpers.js', 'validation.js', 'api.js',
+                'dom.js', 'events.js', 'storage.js', 'cookies.js',
+                'index.html', 'main.html', 'template.html', 'base.html',
+                'header.html', 'footer.html', 'nav.html', 'sidebar.html',
+            ]
+        
+        elif self.tech_stack == "python":
+            return [
+                # Python file extensions
+                '.py', '.pyc', '.pyo', '.pyd', '.pyw', '.pyx', '.pyi',
+                
+                # Python patterns
+                'main.py', 'app.py', 'config.py', 'settings.py', 'utils.py',
+                'helpers.py', 'models.py', 'views.py', 'controllers.py',
+                'routes.py', 'api.py', 'auth.py', 'database.py', 'db.py',
+                'test_', 'tests/', 'test/', '__init__.py', 'requirements.txt',
+                
+                # Python function patterns
+                'def', 'class', 'import', 'from', 'as', 'if', 'else', 'elif',
+                'for', 'while', 'try', 'except', 'finally', 'with', 'return',
+                'yield', 'lambda', 'self', 'super', 'init', 'setup', 'load',
+                
+                # Python directory patterns
+                'src/', 'app/', 'lib/', 'utils/', 'helpers/', 'api/', 'tests/',
+                'static/', 'templates/', 'migrations/', 'docs/', 'scripts/',
+                
+                # Python configuration files
+                'requirements.txt', 'setup.py', 'pyproject.toml', 'Pipfile',
+                'Pipfile.lock', 'poetry.lock', 'pyproject.toml', '.env',
+                'manage.py', 'wsgi.py', 'asgi.py', 'celery.py',
+                
+                # Python framework patterns (Django, Flask, FastAPI)
+                'django', 'flask', 'fastapi', 'views', 'models', 'urls',
+                'settings', 'admin', 'forms', 'serializers', 'middleware',
+            ]
+        
+        elif self.tech_stack == "java":
+            return [
+                # Java file extensions
+                '.java', '.class', '.jar', '.war', '.ear',
+                
+                # Java patterns
+                'Main.java', 'App.java', 'Controller.java', 'Service.java',
+                'Repository.java', 'Model.java', 'Entity.java', 'Config.java',
+                'Application.java', 'Test.java', 'pom.xml', 'build.gradle',
+                
+                # Java keywords and patterns
+                'public', 'private', 'protected', 'static', 'final', 'abstract',
+                'class', 'interface', 'extends', 'implements', 'new', 'return',
+                'if', 'else', 'for', 'while', 'try', 'catch', 'finally',
+                'import', 'package', 'void', 'int', 'String', 'List', 'Map',
+                
+                # Java directory patterns
+                'src/', 'main/', 'test/', 'java/', 'resources/', 'webapp/',
+                'controller/', 'service/', 'repository/', 'model/', 'entity/',
+                
+                # Java configuration files
+                'pom.xml', 'build.gradle', 'gradle.properties', 'application.properties',
+                'application.yml', 'logback.xml', 'web.xml', '.gitignore',
+            ]
+        
+        elif self.tech_stack == "nodejs":
+            return [
+                # Node.js file extensions
+                '.js', '.mjs', '.cjs', '.json', '.env', '.md',
+                
+                # Node.js patterns
+                'app.js', 'server.js', 'index.js', 'main.js', 'config.js',
+                'routes.js', 'controllers.js', 'models.js', 'middleware.js',
+                'utils.js', 'helpers.js', 'services.js', 'database.js',
+                'auth.js', 'validation.js', 'api.js', 'websocket.js',
+                
+                # Express.js patterns
+                'express', 'router', 'app.use', 'app.get', 'app.post',
+                'app.put', 'app.delete', 'app.patch', 'middleware',
+                'body-parser', 'cors', 'helmet', 'morgan', 'compression',
+                
+                # Node.js function patterns
+                'require', 'module.exports', 'exports', 'async', 'await',
+                'Promise', 'resolve', 'reject', 'then', 'catch', 'finally',
+                'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval',
+                'process.env', 'Buffer', 'fs', 'path', 'url', 'querystring',
+                
+                # Node.js directory patterns
+                'src/', 'routes/', 'controllers/', 'models/', 'middleware/',
+                'services/', 'utils/', 'helpers/', 'config/', 'public/',
+                'views/', 'static/', 'uploads/', 'logs/', 'tests/',
+                
+                # Node.js configuration files
+                'package.json', 'package-lock.json', 'yarn.lock', 'npm-shrinkwrap.json',
+                '.env', '.env.local', '.env.production', '.env.development',
+                'nodemon.json', 'pm2.config.js', 'jest.config.js', '.gitignore',
+                'Dockerfile', 'docker-compose.yml', '.dockerignore',
+                
+                # Database patterns
+                'mongoose', 'sequelize', 'prisma', 'knex', 'typeorm',
+                'connection', 'query', 'model', 'schema', 'migration',
+            ]
+        
+        elif self.tech_stack == "vue":
+            return [
+                # Vue.js file extensions
+                '.vue', '.js', '.ts', '.html', '.css', '.scss', '.sass',
+                
+                # Vue.js patterns
+                'App.vue', 'main.js', 'main.ts', 'router.js', 'router.ts',
+                'store.js', 'store.ts', 'index.html', 'vite.config.js',
+                'vue.config.js', 'nuxt.config.js', 'nuxt.config.ts',
+                
+                # Vue.js component patterns
+                'template', 'script', 'style', 'export default', 'defineComponent',
+                'ref', 'reactive', 'computed', 'watch', 'watchEffect', 'onMounted',
+                'onUnmounted', 'onUpdated', 'onBeforeMount', 'onBeforeUnmount',
+                'props', 'emits', 'slots', 'provide', 'inject', 'nextTick',
+                
+                # Vue.js directory patterns
+                'src/', 'components/', 'views/', 'pages/', 'layouts/',
+                'assets/', 'public/', 'static/', 'router/', 'store/',
+                'utils/', 'helpers/', 'api/', 'services/', 'plugins/',
+                
+                # Vue.js configuration files
+                'package.json', 'package-lock.json', 'yarn.lock', 'vite.config.js',
+                'vue.config.js', 'nuxt.config.js', 'tailwind.config.js',
+                'postcss.config.js', 'babel.config.js', '.env', '.gitignore',
+                
+                # Vue.js common patterns
+                'v-if', 'v-else', 'v-for', 'v-model', 'v-bind', 'v-on',
+                'v-show', 'v-cloak', 'v-pre', 'v-once', 'v-text', 'v-html',
+                'computed', 'methods', 'data', 'created', 'mounted', 'updated',
+                'destroyed', 'beforeCreate', 'beforeMount', 'beforeUpdate',
+                'beforeDestroy', 'activated', 'deactivated', 'errorCaptured',
+            ]
+        
+        elif self.tech_stack == "angular":
+            return [
+                # Angular file extensions
+                '.ts', '.js', '.html', '.css', '.scss', '.sass', '.json',
+                
+                # Angular patterns
+                'app.component.ts', 'app.module.ts', 'main.ts', 'polyfills.ts',
+                'app-routing.module.ts', 'app.component.html', 'app.component.css',
+                'angular.json', 'tsconfig.json', 'package.json', 'karma.conf.js',
+                
+                # Angular component patterns
+                '@Component', '@Injectable', '@Pipe', '@Directive', '@NgModule',
+                '@Input', '@Output', '@HostListener', '@HostBinding', '@ViewChild',
+                '@ViewChildren', '@ContentChild', '@ContentChildren', '@Inject',
+                '@Optional', '@Self', '@SkipSelf', '@Host', '@Attribute',
+                
+                # Angular lifecycle hooks
+                'ngOnInit', 'ngOnDestroy', 'ngOnChanges', 'ngDoCheck',
+                'ngAfterContentInit', 'ngAfterContentChecked', 'ngAfterViewInit',
+                'ngAfterViewChecked', 'constructor', 'super',
+                
+                # Angular directory patterns
+                'src/', 'app/', 'components/', 'services/', 'models/',
+                'pipes/', 'directives/', 'guards/', 'interceptors/',
+                'assets/', 'environments/', 'shared/', 'core/', 'features/',
+                
+                # Angular configuration files
+                'angular.json', 'tsconfig.json', 'tsconfig.app.json',
+                'tsconfig.spec.json', 'package.json', 'package-lock.json',
+                'karma.conf.js', 'protractor.conf.js', '.gitignore',
+                'src/environments/environment.ts', 'src/environments/environment.prod.ts',
+                
+                # Angular common patterns
+                'import', 'export', 'class', 'interface', 'enum', 'type',
+                'public', 'private', 'protected', 'static', 'readonly',
+                'async', 'await', 'Promise', 'Observable', 'Subject',
+                'BehaviorSubject', 'ReplaySubject', 'AsyncSubject',
+            ]
+        
+        elif self.tech_stack == "csharp":
+            return [
+                # C# file extensions
+                '.cs', '.csproj', '.sln', '.config', '.xml', '.json',
+                
+                # C# patterns
+                'Program.cs', 'Startup.cs', 'appsettings.json', 'appsettings.Development.json',
+                'Controller.cs', 'Service.cs', 'Repository.cs', 'Model.cs', 'Entity.cs',
+                'DbContext.cs', 'Program.cs', 'Startup.cs', 'launchSettings.json',
+                
+                # C# keywords and patterns
+                'using', 'namespace', 'class', 'interface', 'struct', 'enum',
+                'public', 'private', 'protected', 'internal', 'static', 'readonly',
+                'const', 'virtual', 'abstract', 'override', 'sealed', 'partial',
+                'async', 'await', 'Task', 'void', 'return', 'new', 'this',
+                'base', 'super', 'if', 'else', 'switch', 'case', 'default',
+                'for', 'foreach', 'while', 'do', 'try', 'catch', 'finally',
+                'throw', 'using', 'lock', 'checked', 'unchecked', 'unsafe',
+                
+                # C# directory patterns
+                'src/', 'Controllers/', 'Services/', 'Models/', 'Entities/',
+                'Repositories/', 'Data/', 'Migrations/', 'Views/', 'wwwroot/',
+                'Areas/', 'Filters/', 'Middleware/', 'Extensions/', 'Helpers/',
+                
+                # C# configuration files
+                '.csproj', '.sln', 'appsettings.json', 'appsettings.Development.json',
+                'launchSettings.json', 'global.json', 'Directory.Build.props',
+                'Directory.Build.targets', 'NuGet.config', 'packages.config',
+                
+                # .NET patterns
+                'Microsoft.AspNetCore', 'Microsoft.EntityFrameworkCore',
+                'System', 'System.Collections.Generic', 'System.Linq',
+                'System.Threading.Tasks', 'System.ComponentModel.DataAnnotations',
+                'Newtonsoft.Json', 'AutoMapper', 'FluentValidation',
+            ]
+        
+        elif self.tech_stack == "go":
+            return [
+                # Go file extensions
+                '.go', '.mod', '.sum', '.work', '.yaml', '.yml',
+                
+                # Go patterns
+                'main.go', 'go.mod', 'go.sum', 'go.work', 'Dockerfile',
+                'handler.go', 'service.go', 'repository.go', 'model.go',
+                'middleware.go', 'router.go', 'config.go', 'utils.go',
+                
+                # Go keywords and patterns
+                'package', 'import', 'func', 'var', 'const', 'type', 'struct',
+                'interface', 'map', 'slice', 'chan', 'go', 'defer', 'panic',
+                'recover', 'select', 'range', 'for', 'if', 'else', 'switch',
+                'case', 'default', 'break', 'continue', 'fallthrough',
+                'return', 'new', 'make', 'len', 'cap', 'append', 'copy',
+                'delete', 'close', 'nil', 'true', 'false', 'iota',
+                
+                # Go directory patterns
+                'cmd/', 'internal/', 'pkg/', 'api/', 'handlers/', 'services/',
+                'repositories/', 'models/', 'middleware/', 'config/', 'utils/',
+                'docs/', 'scripts/', 'deployments/', 'testdata/', 'vendor/',
+                
+                # Go configuration files
+                'go.mod', 'go.sum', 'go.work', 'Dockerfile', 'docker-compose.yml',
+                '.gitignore', 'Makefile', 'README.md', 'LICENSE', '.env',
+                
+                # Go common patterns
+                'context.Context', 'error', 'fmt', 'log', 'os', 'io',
+                'net/http', 'encoding/json', 'database/sql', 'gorm.io/gorm',
+                'gin-gonic/gin', 'gorilla/mux', 'julienschmidt/httprouter',
+                'golang.org/x/net/http2', 'golang.org/x/crypto',
+            ]
+        
+        elif self.tech_stack == "rust":
+            return [
+                # Rust file extensions
+                '.rs', '.toml', '.lock', '.md', '.txt',
+                
+                # Rust patterns
+                'main.rs', 'lib.rs', 'Cargo.toml', 'Cargo.lock', 'src/',
+                'handler.rs', 'service.rs', 'model.rs', 'config.rs',
+                'utils.rs', 'error.rs', 'types.rs', 'traits.rs',
+                
+                # Rust keywords and patterns
+                'fn', 'let', 'mut', 'const', 'static', 'struct', 'enum',
+                'impl', 'trait', 'use', 'mod', 'pub', 'crate', 'super',
+                'self', 'Self', 'as', 'where', 'for', 'in', 'if', 'else',
+                'match', 'loop', 'while', 'for', 'break', 'continue',
+                'return', 'unsafe', 'extern', 'macro_rules', 'async',
+                'await', 'move', 'ref', 'Box', 'Rc', 'Arc', 'Mutex',
+                'RwLock', 'Option', 'Result', 'Some', 'None', 'Ok', 'Err',
+                
+                # Rust directory patterns
+                'src/', 'tests/', 'examples/', 'benches/', 'target/',
+                'handlers/', 'services/', 'models/', 'config/', 'utils/',
+                'error/', 'types/', 'traits/', 'macros/', 'docs/',
+                
+                # Rust configuration files
+                'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml',
+                '.cargo/config.toml', '.gitignore', 'README.md', 'LICENSE',
+                'Dockerfile', 'docker-compose.yml', '.rustfmt.toml',
+                
+                # Rust common patterns
+                'std::', 'collections::', 'io::', 'fs::', 'net::', 'thread::',
+                'sync::', 'time::', 'rand::', 'serde::', 'tokio::', 'actix::',
+                'warp::', 'rocket::', 'axum::', 'tower::', 'hyper::',
+                'reqwest::', 'sqlx::', 'diesel::', 'sea-orm::',
+            ]
+        
+        else:
+            # Default to PHP if unknown tech stack
+            return [
+                # PHP file extensions
+                '.php', '.phtml', '.phar', '.inc',
+                
+                # PHP framework patterns (Laravel, Symfony, CodeIgniter, etc.)
+                'app/', 'config/', 'database/', 'resources/', 'routes/',
+                'storage/', 'vendor/', 'public/', 'bootstrap/', 'tests/',
+                'migrations/', 'seeders/', 'factories/', 'providers/',
+                'middleware/', 'controllers/', 'models/', 'views/',
+                'layouts/', 'components/', 'partials/', 'templates/',
+                
+                # PHP Composer patterns
+                'composer.json', 'composer.lock', 'autoload.php', 'vendor/',
+                'psr-4', 'psr-0', 'require', 'require-dev', 'autoload',
+                
+                # Common PHP project patterns
+                'index.php', 'main.php', 'app.php', 'bootstrap.php',
+                'init.php', 'setup.php', 'config.php', 'database.php',
+                'connection.php', 'db.php', 'mysql.php', 'pdo.php',
+                'session.php', 'auth.php', 'login.php', 'register.php',
+                'profile.php', 'admin.php', 'dashboard.php', 'api.php',
+                'rest.php', 'ajax.php', 'cron.php', 'cli.php',
+                
+                # PHP class and function patterns
+                'class', 'function', 'namespace', 'use', 'require', 'include',
+                'public', 'private', 'protected', 'static', 'abstract', 'interface',
+                'trait', 'extends', 'implements', 'new', 'return', 'echo', 'print',
+                'isset', 'empty', 'unset', 'array', 'string', 'int', 'float', 'bool',
+                'null', 'true', 'false', 'try', 'catch', 'throw', 'finally',
+                'foreach', 'while', 'for', 'if', 'else', 'elseif', 'switch', 'case',
+                'default', 'break', 'continue', 'do', 'while', 'endwhile', 'endif',
+                'endforeach', 'endfor', 'endforeach', 'endswitch', 'enddeclare',
+                
+                # PHP file patterns
+                'index.php', 'config.php', 'database.php', 'functions.php',
+                'utils.php', 'helpers.php', 'classes.php', 'models.php',
+                'controllers.php', 'views.php', 'templates.php', 'api.php',
+                'auth.php', 'session.php', 'cookies.php', 'validation.php',
+                'form.php', 'mail.php', 'upload.php', 'download.php',
+                
+                # Common PHP project directories
+                'includes/', 'classes/', 'functions/', 'templates/',
+                'public/', 'static/', 'assets/', 'images/', 'uploads/',
+                'logs/', 'cache/', 'temp/', 'backup/', 'docs/',
+                
+                # PHP configuration files
+                'composer.json', 'composer.lock', 'phpunit.xml', '.htaccess',
+                '.env', '.gitignore', 'php.ini', 'apache.conf', 'nginx.conf',
+                
+                # PHP testing patterns
+                'test', 'tests/', 'phpunit', 'TestCase', 'Feature', 'Unit',
+                'test_', 'Test.php', 'TestCase.php', 'FeatureTest.php',
+                
+                # PHP common function names
+                'init', 'setup', 'load', 'save', 'create', 'update', 'delete',
+                'validate', 'format', 'parse', 'convert', 'filter', 'sort',
+                'search', 'find', 'add', 'remove', 'show', 'hide', 'toggle',
+                'open', 'close', 'start', 'stop', 'connect', 'disconnect',
+                
+                # PHP database patterns
+                'database', 'db', 'mysql', 'pdo', 'query', 'select', 'insert',
+                'update', 'delete', 'where', 'order', 'group', 'join', 'table',
+                'migration', 'seeder', 'model', 'repository', 'connection',
+                
+                # PHP web patterns
+                'controller', 'action', 'route', 'request', 'response', 'session',
+                'cookie', 'header', 'redirect', 'view', 'template', 'layout',
+                'form', 'input', 'validation', 'upload', 'download', 'api',
+            ]
     
     def is_chrome_active(self):
         """Check if Google Chrome is the active window"""
@@ -149,102 +614,8 @@ class Simulator:
         pyautogui.hotkey('ctrl', 'p')
         time.sleep(random.uniform(0.3, 0.5))
 
-        # Code file specific search patterns - targeting both React/TypeScript and vanilla JS/HTML
-        search_patterns = [
-            # File extensions for React/TypeScript, vanilla JS/HTML, and PHP
-            '.tsx', '.jsx', '.ts', '.js', '.html', '.css', '.scss', '.sass',
-            '.php', '.phtml', '.phar',
-            
-            # React/TypeScript specific patterns
-            'use', 'get', 'set', 'handle', 'create', 'fetch', 'update', 'delete',
-            'Button', 'Modal', 'Form', 'Input', 'Card', 'Header', 'Footer', 'Nav',
-            'Layout', 'Page', 'Component', 'Hook', 'Context', 'Provider',
-            'page', 'layout', 'component', 'hook', 'util', 'service', 'api',
-            'store', 'reducer', 'action', 'selector', 'middleware', 'config',
-            'index.tsx', 'index.jsx', 'App.tsx', 'App.jsx',
-            'layout.tsx', 'page.tsx', 'loading.tsx', 'types.ts',
-            
-            # Vanilla JavaScript/HTML patterns
-            'script', 'main', 'app', 'index', 'utils', 'helpers', 'functions',
-            'validation', 'form', 'modal', 'popup', 'menu', 'nav', 'header', 'footer',
-            'sidebar', 'content', 'container', 'wrapper', 'section', 'article',
-            'button', 'input', 'select', 'textarea', 'label', 'div', 'span',
-            'table', 'list', 'item', 'card', 'box', 'panel', 'dialog',
-            
-            # Common JavaScript function patterns
-            'init', 'setup', 'load', 'save', 'export', 'import', 'render',
-            'calculate', 'process', 'validate', 'format', 'parse', 'convert',
-            'filter', 'sort', 'search', 'find', 'add', 'remove', 'update',
-            'show', 'hide', 'toggle', 'open', 'close', 'start', 'stop',
-            
-            # HTML structure patterns
-            'index.html', 'main.html', 'template.html', 'base.html',
-            'head', 'body', 'header', 'footer', 'nav', 'main', 'aside',
-            'section', 'article', 'div', 'span', 'p', 'h1', 'h2', 'h3',
-            
-            # CSS/SCSS patterns
-            'style', 'styles', 'css', 'scss', 'sass', 'theme', 'variables',
-            'layout', 'grid', 'flex', 'responsive', 'mobile', 'desktop',
-            'header', 'footer', 'nav', 'sidebar', 'content', 'container',
-            'button', 'input', 'form', 'modal', 'popup', 'card', 'list',
-            
-            # PHP specific patterns
-            'class', 'function', 'namespace', 'use', 'require', 'include',
-            'public', 'private', 'protected', 'static', 'abstract', 'interface',
-            'trait', 'extends', 'implements', 'new', 'return', 'echo', 'print',
-            'isset', 'empty', 'unset', 'array', 'string', 'int', 'float', 'bool',
-            'null', 'true', 'false', 'try', 'catch', 'throw', 'finally',
-            'foreach', 'while', 'for', 'if', 'else', 'elseif', 'switch', 'case',
-            'default', 'break', 'continue', 'do', 'while', 'endwhile', 'endif',
-            'endforeach', 'endfor', 'endforeach', 'endswitch', 'enddeclare',
-            
-            # PHP file patterns
-            'index.php', 'config.php', 'database.php', 'functions.php',
-            'utils.php', 'helpers.php', 'classes.php', 'models.php',
-            'controllers.php', 'views.php', 'templates.php', 'api.php',
-            'auth.php', 'session.php', 'cookies.php', 'validation.php',
-            'form.php', 'mail.php', 'upload.php', 'download.php',
-            
-            # PHP framework patterns (Laravel, Symfony, CodeIgniter, etc.)
-            'app/', 'config/', 'database/', 'resources/', 'routes/',
-            'storage/', 'vendor/', 'public/', 'bootstrap/', 'tests/',
-            'migrations/', 'seeders/', 'factories/', 'providers/',
-            'middleware/', 'controllers/', 'models/', 'views/',
-            'layouts/', 'components/', 'partials/', 'templates/',
-            
-            # PHP Composer patterns
-            'composer.json', 'composer.lock', 'autoload.php', 'vendor/',
-            'psr-4', 'psr-0', 'require', 'require-dev', 'autoload',
-            
-            # Common PHP project patterns
-            'index.php', 'main.php', 'app.php', 'bootstrap.php',
-            'init.php', 'setup.php', 'config.php', 'database.php',
-            'connection.php', 'db.php', 'mysql.php', 'pdo.php',
-            'session.php', 'auth.php', 'login.php', 'register.php',
-            'profile.php', 'admin.php', 'dashboard.php', 'api.php',
-            'rest.php', 'ajax.php', 'cron.php', 'cli.php',
-            
-            # Common directory patterns for all project types
-            'src/', 'components/', 'pages/', 'js/', 'css/', 'styles/',
-            'utils/', 'helpers/', 'lib/', 'api/', 'assets/', 'images/',
-            'public/', 'static/', 'dist/', 'build/', 'node_modules/',
-            'includes/', 'classes/', 'functions/', 'templates/',
-            
-            # Project configuration files
-            'package.json', 'package-lock.json', 'yarn.lock', 'webpack.config',
-            'vite.config', 'rollup.config', 'babel.config', 'eslint.config',
-            'tsconfig.json', 'jsconfig.json', '.env', '.gitignore',
-            'composer.json', 'composer.lock', 'phpunit.xml', '.htaccess',
-            
-            # Common vanilla JS project patterns
-            'app.js', 'main.js', 'index.js', 'script.js', 'utils.js',
-            'functions.js', 'helpers.js', 'validation.js', 'api.js',
-            'dom.js', 'events.js', 'storage.js', 'cookies.js',
-            
-            # Common HTML project patterns
-            'index.html', 'main.html', 'template.html', 'base.html',
-            'header.html', 'footer.html', 'nav.html', 'sidebar.html',
-        ]
+        # Get search patterns based on tech stack
+        search_patterns = self.get_search_patterns()
         
         # Type 1-2 search patterns (reduced to avoid too long searches)
         num_patterns = random.randint(1, 2)
@@ -291,84 +662,8 @@ class Simulator:
         pyautogui.hotkey('ctrl', 'p')
         time.sleep(random.uniform(0.3, 0.5))
 
-        # VS Code file search patterns - targeting common development files
-        search_patterns = [
-            # File extensions for various programming languages
-            '.tsx', '.jsx', '.ts', '.js', '.html', '.css', '.scss', '.sass',
-            '.php', '.phtml', '.py', '.java', '.cpp', '.c', '.cs', '.go',
-            '.rs', '.rb', '.swift', '.kt', '.scala', '.clj', '.hs', '.ml',
-            '.sql', '.json', '.xml', '.yaml', '.yml', '.toml', '.ini',
-            '.md', '.txt', '.log', '.sh', '.bat', '.ps1', '.dockerfile',
-            
-            # React/TypeScript specific patterns
-            'use', 'get', 'set', 'handle', 'create', 'fetch', 'update', 'delete',
-            'Button', 'Modal', 'Form', 'Input', 'Card', 'Header', 'Footer', 'Nav',
-            'Layout', 'Page', 'Component', 'Hook', 'Context', 'Provider',
-            'page', 'layout', 'component', 'hook', 'util', 'service', 'api',
-            'store', 'reducer', 'action', 'selector', 'middleware', 'config',
-            'index.tsx', 'index.jsx', 'App.tsx', 'App.jsx',
-            'layout.tsx', 'page.tsx', 'loading.tsx', 'types.ts',
-            
-            # Common file patterns
-            'main', 'app', 'index', 'utils', 'helpers', 'functions',
-            'validation', 'form', 'modal', 'popup', 'menu', 'nav', 'header', 'footer',
-            'sidebar', 'content', 'container', 'wrapper', 'section', 'article',
-            'button', 'input', 'select', 'textarea', 'label', 'div', 'span',
-            'table', 'list', 'item', 'card', 'box', 'panel', 'dialog',
-            
-            # Common function patterns
-            'init', 'setup', 'load', 'save', 'export', 'import', 'render',
-            'calculate', 'process', 'validate', 'format', 'parse', 'convert',
-            'filter', 'sort', 'search', 'find', 'add', 'remove', 'update',
-            'show', 'hide', 'toggle', 'open', 'close', 'start', 'stop',
-            
-            # HTML structure patterns
-            'index.html', 'main.html', 'template.html', 'base.html',
-            'head', 'body', 'header', 'footer', 'nav', 'main', 'aside',
-            'section', 'article', 'div', 'span', 'p', 'h1', 'h2', 'h3',
-            
-            # CSS/SCSS patterns
-            'style', 'styles', 'css', 'scss', 'sass', 'theme', 'variables',
-            'layout', 'grid', 'flex', 'responsive', 'mobile', 'desktop',
-            'header', 'footer', 'nav', 'sidebar', 'content', 'container',
-            'button', 'input', 'form', 'modal', 'popup', 'card', 'list',
-            
-            # Python patterns
-            'main.py', 'app.py', 'config.py', 'settings.py', 'utils.py',
-            'helpers.py', 'models.py', 'views.py', 'controllers.py',
-            'routes.py', 'api.py', 'auth.py', 'database.py', 'db.py',
-            'test_', 'tests/', 'test/', '__init__.py', 'requirements.txt',
-            
-            # Java patterns
-            'Main.java', 'App.java', 'Controller.java', 'Service.java',
-            'Repository.java', 'Model.java', 'Entity.java', 'Config.java',
-            'Application.java', 'Test.java', 'pom.xml', 'build.gradle',
-            
-            # C/C++ patterns
-            'main.c', 'main.cpp', 'app.c', 'app.cpp', 'utils.c', 'utils.cpp',
-            'header.h', 'config.h', 'CMakeLists.txt', 'Makefile',
-            
-            # Common directory patterns
-            'src/', 'components/', 'pages/', 'js/', 'css/', 'styles/',
-            'utils/', 'helpers/', 'lib/', 'api/', 'assets/', 'images/',
-            'public/', 'static/', 'dist/', 'build/', 'node_modules/',
-            'includes/', 'classes/', 'functions/', 'templates/',
-            
-            # Project configuration files
-            'package.json', 'package-lock.json', 'yarn.lock', 'webpack.config',
-            'vite.config', 'rollup.config', 'babel.config', 'eslint.config',
-            'tsconfig.json', 'jsconfig.json', '.env', '.gitignore',
-            'composer.json', 'composer.lock', 'phpunit.xml', '.htaccess',
-            'requirements.txt', 'setup.py', 'pyproject.toml', 'Pipfile',
-            'pom.xml', 'build.gradle', 'CMakeLists.txt', 'Makefile',
-            
-            # Common file names
-            'app.js', 'main.js', 'index.js', 'script.js', 'utils.js',
-            'functions.js', 'helpers.js', 'validation.js', 'api.js',
-            'dom.js', 'events.js', 'storage.js', 'cookies.js',
-            'index.html', 'main.html', 'template.html', 'base.html',
-            'header.html', 'footer.html', 'nav.html', 'sidebar.html',
-        ]
+        # Get search patterns based on tech stack
+        search_patterns = self.get_search_patterns()
         
         # Type 1-2 search patterns (reduced to avoid too long searches)
         num_patterns = random.randint(1, 2)
@@ -1174,7 +1469,25 @@ class Simulator:
 
 if __name__ == "__main__":
     
-    simulator = Simulator()
+    # Configure the tech stack for search patterns
+    # Available options: "php", "react", "python", "java", "nodejs", "vue", "angular", "csharp", "go", "rust"
+    # Example: simulator = Simulator(tech_stack="react") for React/TypeScript development
+    # Example: simulator = Simulator(tech_stack="python") for Python development
+    # Example: simulator = Simulator(tech_stack="java") for Java development
+    # Example: simulator = Simulator(tech_stack="nodejs") for Node.js/Express development
+    # Example: simulator = Simulator(tech_stack="vue") for Vue.js development
+    # Example: simulator = Simulator(tech_stack="angular") for Angular development
+    # Example: simulator = Simulator(tech_stack="csharp") for C#/.NET development
+    # Example: simulator = Simulator(tech_stack="go") for Go development
+    # Example: simulator = Simulator(tech_stack="rust") for Rust development
+    # Default: simulator = Simulator(tech_stack="php") for PHP development
+    
+    simulator = Simulator(tech_stack="php")  # Change this to your preferred tech stack
+    
+    print(f"Starting activity simulator with tech stack: {simulator.tech_stack}")
+    print("Available tech stacks: php, react, python, java, nodejs, vue, angular, csharp, go, rust")
+    print("To change tech stack, modify the tech_stack parameter in the Simulator() call")
+    
     try:
         simulator.run(duration_minutes=60)  # Run for 1 hour by default
     except KeyboardInterrupt:
