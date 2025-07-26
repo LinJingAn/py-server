@@ -796,17 +796,13 @@ class Simulator:
                     end_x = random.randint(0, self.screen_width)
                     end_y = random.randint(0, self.screen_height)
             else:
-                # Linux/Ubuntu: use screen coordinates for now
-                # Could be enhanced with xdotool window geometry if needed
                 end_x = random.randint(0, self.screen_width)
                 end_y = random.randint(0, self.screen_height)
         else:
             end_x = random.randint(0, self.screen_width)
             end_y = random.randint(0, self.screen_height)
         
-        # Create a natural curve for the mouse movement with fewer steps for faster movement
         if self.platform != "Windows":
-            # Ubuntu: More visible mouse movement with longer duration
             steps = random.randint(15, 25)  # More steps for smoother movement
             for i in range(steps):
                 progress = i / steps
@@ -843,9 +839,7 @@ class Simulator:
         if not self.is_cursor_ide_active():
             return
 
-        # Code patterns for both React/TypeScript and vanilla JavaScript/HTML development
         patterns = [
-            # React functional component patterns
             "const HomePage = () => {",
             "const UserProfile = ({ user }: { user: User }) => {",
             "const ProductCard = ({ product, onSelect }: ProductCardProps) => {",
