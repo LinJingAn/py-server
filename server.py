@@ -802,9 +802,7 @@ class Simulator:
             end_x = random.randint(0, self.screen_width)
             end_y = random.randint(0, self.screen_height)
         
-        # Create a natural curve for the mouse movement with fewer steps for faster movement
         if self.platform != "Windows":
-            # Ubuntu: More visible mouse movement with longer duration
             steps = random.randint(15, 25)  # More steps for smoother movement
             for i in range(steps):
                 progress = i / steps
