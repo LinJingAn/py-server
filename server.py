@@ -841,9 +841,7 @@ class Simulator:
         if not self.is_cursor_ide_active():
             return
 
-        # Code patterns for both React/TypeScript and vanilla JavaScript/HTML development
         patterns = [
-            # React functional component patterns
             "const HomePage = () => {",
             "const UserProfile = ({ user }: { user: User }) => {",
             "const ProductCard = ({ product, onSelect }: ProductCardProps) => {",
