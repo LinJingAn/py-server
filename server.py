@@ -796,8 +796,6 @@ class Simulator:
                     end_x = random.randint(0, self.screen_width)
                     end_y = random.randint(0, self.screen_height)
             else:
-                # Linux/Ubuntu: use screen coordinates for now
-                # Could be enhanced with xdotool window geometry if needed
                 end_x = random.randint(0, self.screen_width)
                 end_y = random.randint(0, self.screen_height)
         else:
