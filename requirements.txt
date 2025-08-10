@@ -1,7 +1,24 @@
-pyautogui==0.9.54
-psutil==5.9.5
+# ===============================
+# Core Python dependencies (cross-platform)
+# ===============================
+pyautogui==0.9.54   # Mouse/keyboard automation
+psutil==5.9.5       # System and process utilities
 
-# Platform-specific dependencies
-# For Windows: pip install pywin32==307
-# For Ubuntu: sudo apt-get install wmctrl xdotool python3-tk python3-dev
-# For Ubuntu mouse movement: sudo apt-get install python3-xlib 
+# ===============================
+# Windows-specific dependency
+# ===============================
+# Only installs on Windows (ignored on Linux/macOS)
+pywin32==307; sys_platform == "win32"
+
+# ===============================
+# Linux/Ubuntu prerequisites (NOT installed via pip)
+# ===============================
+# Install these manually via apt:
+#   sudo apt update
+#   sudo apt install wmctrl xdotool python3-tk python3-dev python3-xlib
+#
+# wmctrl      - Allows listing & switching windows
+# xdotool     - Automates keyboard/mouse for window management
+# python3-tk  - Required for pyautogui's screenshot & GUI functions
+# python3-dev - Required for compiling some Python packages
+# python3-xlib - Enables low-level mouse/keyboard control on Linux

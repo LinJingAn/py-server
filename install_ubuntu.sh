@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+echo "This script documents recommended Ubuntu packages (it will not auto-run apt installs)."
+echo "To prepare a system for GUI automation (ONLY if you understand the security/legal implications), run:"
+echo ""
+echo "  sudo apt update"
+echo "  sudo apt install -y wmctrl xdotool python3-tk python3-dev python3-xlib"
+echo ""
+echo "After installing system packages, create a virtualenv and install python deps:"
+echo ""
+echo "  python3 -m venv .venv"
+echo "  source .venv/bin/activate"
+echo "  pip install -r requirements.txt"
+echo ""
+echo "Important: modern Ubuntu may default to Wayland. For reliable input injection use an Xorg session."
