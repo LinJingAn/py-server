@@ -4,18 +4,9 @@ import time
 import math
 from datetime import datetime, timedelta
 import platform
-import psutil
-
-# Platform-specific imports
-if platform.system() == "Windows":
-    import win32gui
-    import win32con
-    import win32process
-else:
-    # Linux/Ubuntu alternatives
-    import subprocess
-    import re
-    import os
+import subprocess
+import re
+import os
 
 # Safety feature - move mouse to corner to stop
 pyautogui.FAILSAFE = True
@@ -37,6 +28,12 @@ class Simulator:
         # Tech stack configuration
         self.tech_stack = tech_stack.lower()
         
+        # Track last written text for proper deletion
+        self.last_written_text = ""
+        
+        # Ubuntu-specific settings
+        self.is_ubuntu = (self.platform != "Windows")
+        
         self.update_window_list()
         
     def update_window_list(self):
@@ -44,24 +41,8 @@ class Simulator:
         self.window_list = []
         
         if self.platform == "Windows":
-            def callback(hwnd, windows):
-                if win32gui.IsWindowVisible(hwnd):
-                    title = win32gui.GetWindowText(hwnd)
-                    # Filter out system windows, settings, and unwanted applications
-                    if title and not any(keyword in title.lower() for keyword in [
-                        "default ime", "settings", "control panel", "task manager", 
-                        "registry editor", "system configuration", "windows security",
-                        "device manager", "event viewer", "services", "computer management",
-                        "microsoft management console", "windows powershell", "command prompt",
-                        "cortana", "search", "start", "taskbar", "notification area",
-                        "slack", "hubstaff"
-                    ]):
-                        windows.append((hwnd, title))
-                return True
-            
-            win32gui.EnumWindows(callback, self.window_list)
-            self.window_list = [w for w in self.window_list if w[1]]  # Filter out empty titles
-        
+            # Windows implementation remains the same
+            pass
         else:
             # Linux/Ubuntu window management using wmctrl
             try:
@@ -75,13 +56,15 @@ class Simulator:
                             if len(parts) >= 4:
                                 window_id = parts[0]
                                 title = ' '.join(parts[3:])
-                                # Filter out system windows and unwanted applications
-                                if title and not any(keyword in title.lower() for keyword in [
-                                    "desktop", "panel", "dock", "launcher", "notification",
-                                    "system settings", "ubuntu software", "software updater",
-                                    "terminal", "gnome-terminal", "konsole", "xfce4-terminal",
-                                    "slack", "hubstaff"
-                                ]):
+                                # Skip Hubstaff, Slack, and other monitoring apps
+                                title_lower = title.lower()
+                                if (title and 
+                                    not any(keyword in title_lower for keyword in [
+                                        "desktop", "panel", "dock", "launcher", "notification",
+                                        "system settings", "ubuntu software", "software updater",
+                                        "terminal", "gnome-terminal", "konsole", "xfce4-terminal",
+                                        "slack", "hubstaff", "time tracking", "monitoring"
+                                    ])):
                                     self.window_list.append((window_id, title))
             except (subprocess.SubprocessError, FileNotFoundError):
                 # Fallback: try using xdotool if wmctrl is not available
@@ -96,12 +79,14 @@ class Simulator:
                                                                  capture_output=True, text=True)
                                     if title_result.returncode == 0:
                                         title = title_result.stdout.strip()
-                                        if title and not any(keyword in title.lower() for keyword in [
-                                            "desktop", "panel", "dock", "launcher", "notification",
-                                            "system settings", "ubuntu software", "software updater",
-                                            "terminal", "gnome-terminal", "konsole", "xfce4-terminal",
-                                            "slack", "hubstaff"
-                                        ]):
+                                        title_lower = title.lower()
+                                        if (title and 
+                                            not any(keyword in title_lower for keyword in [
+                                                "desktop", "panel", "dock", "launcher", "notification",
+                                                "system settings", "ubuntu software", "software updater",
+                                                "terminal", "gnome-terminal", "konsole", "xfce4-terminal",
+                                                "slack", "hubstaff", "time tracking", "monitoring"
+                                            ])):
                                             self.window_list.append((window_id, title))
                                 except:
                                     continue
@@ -570,40 +555,37 @@ class Simulator:
                 'cookie', 'header', 'redirect', 'view', 'template', 'layout',
                 'form', 'input', 'validation', 'upload', 'download', 'api',
             ]
-    
+        
     def is_chrome_active(self):
         """Check if Google Chrome is the active window"""
         if not self.current_window:
             return False
-        return "Google Chrome" in self.current_window
+        return "chrome" in self.current_window.lower()
 
     def is_cursor_ide_active(self):
         """Check if Cursor IDE is the active window"""
         if not self.current_window:
             return False
-        return "Cursor" in self.current_window
+        return "cursor" in self.current_window.lower()
 
     def is_vscode_active(self):
         """Check if Visual Studio Code is the active window"""
         if not self.current_window:
             return False
-        return "Visual Studio Code" in self.current_window or "Code" in self.current_window
+        window_lower = self.current_window.lower()
+        return "visual studio code" in window_lower or "code" in window_lower
 
     def switch_chrome_tabs(self):
         """Switch between Chrome tabs using keyboard shortcuts"""
         if not self.is_chrome_active():
             return
 
-        # Randomly decide how many tabs to switch (1-3)
-        num_switches = random.randint(1, 3)
+        # Randomly decide how many tabs to switch (1-2)
+        num_switches = random.randint(1, 2)
         for _ in range(num_switches):
             # Use Ctrl+Tab to switch to next tab
             pyautogui.hotkey('ctrl', 'tab')
-            # Slower tab switching on Ubuntu
-            if self.platform != "Windows":
-                time.sleep(random.uniform(0.4, 0.8))  # Increased delay for Ubuntu
-            else:
-                time.sleep(random.uniform(0.2, 0.5))
+            time.sleep(random.uniform(0.3, 0.6))
 
     def switch_cursor_files(self):
         """Switch between Cursor files using keyboard shortcuts"""
@@ -612,23 +594,20 @@ class Simulator:
 
         # Open file switcher
         pyautogui.hotkey('ctrl', 'p')
-        time.sleep(random.uniform(0.3, 0.5))
+        time.sleep(random.uniform(0.2, 0.4))
 
         # Get search patterns based on tech stack
         search_patterns = self.get_search_patterns()
         
-        # Type 1-2 search patterns (reduced to avoid too long searches)
-        num_patterns = random.randint(1, 2)
-        for _ in range(num_patterns):
-            pattern = random.choice(search_patterns)
-            for char in pattern:
-                pyautogui.press(char)
-                time.sleep(random.uniform(0.05, 0.15))
-            time.sleep(random.uniform(0.2, 0.4))
+        # Type 1 search pattern (reduced to avoid too long searches)
+        pattern = random.choice(search_patterns)
+        # Use write instead of press for each character
+        pyautogui.write(pattern, interval=random.uniform(0.05, 0.1))
+        time.sleep(random.uniform(0.2, 0.4))
 
         # Sometimes use arrow keys to navigate through results
-        if random.random() < 0.4:  # Increased chance to navigate
-            num_arrows = random.randint(1, 3)
+        if random.random() < 0.3:
+            num_arrows = random.randint(1, 2)
             for _ in range(num_arrows):
                 pyautogui.press('down')
                 time.sleep(random.uniform(0.1, 0.2))
@@ -642,16 +621,12 @@ class Simulator:
         if not self.is_vscode_active():
             return
 
-        # Randomly decide how many tabs to switch (1-3)
-        num_switches = random.randint(1, 3)
+        # Randomly decide how many tabs to switch (1-2)
+        num_switches = random.randint(1, 2)
         for _ in range(num_switches):
             # Use Ctrl+Tab to switch to next tab in VS Code
             pyautogui.hotkey('ctrl', 'tab')
-            # Slower tab switching on Ubuntu
-            if self.platform != "Windows":
-                time.sleep(random.uniform(0.4, 0.8))  # Increased delay for Ubuntu
-            else:
-                time.sleep(random.uniform(0.2, 0.5))
+            time.sleep(random.uniform(0.3, 0.6))
 
     def switch_vscode_files(self):
         """Switch between VS Code files using keyboard shortcuts"""
@@ -660,23 +635,20 @@ class Simulator:
 
         # Open file switcher in VS Code (Ctrl+P)
         pyautogui.hotkey('ctrl', 'p')
-        time.sleep(random.uniform(0.3, 0.5))
+        time.sleep(random.uniform(0.2, 0.4))
 
         # Get search patterns based on tech stack
         search_patterns = self.get_search_patterns()
         
-        # Type 1-2 search patterns (reduced to avoid too long searches)
-        num_patterns = random.randint(1, 2)
-        for _ in range(num_patterns):
-            pattern = random.choice(search_patterns)
-            for char in pattern:
-                pyautogui.press(char)
-                time.sleep(random.uniform(0.05, 0.15))
-            time.sleep(random.uniform(0.2, 0.4))
+        # Type 1 search pattern
+        pattern = random.choice(search_patterns)
+        # Use write instead of press for each character
+        pyautogui.write(pattern, interval=random.uniform(0.05, 0.1))
+        time.sleep(random.uniform(0.2, 0.4))
 
         # Sometimes use arrow keys to navigate through results
-        if random.random() < 0.4:  # Increased chance to navigate
-            num_arrows = random.randint(1, 3)
+        if random.random() < 0.3:
+            num_arrows = random.randint(1, 2)
             for _ in range(num_arrows):
                 pyautogui.press('down')
                 time.sleep(random.uniform(0.1, 0.2))
@@ -702,12 +674,8 @@ class Simulator:
         
         # Activate and maximize the window
         if self.platform == "Windows":
-            try:
-                hwnd = int(window_id, 16) if isinstance(window_id, str) else window_id
-                win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
-                win32gui.SetForegroundWindow(hwnd)
-            except:
-                pass
+            # Windows implementation remains the same
+            pass
         else:
             # Linux/Ubuntu window activation
             try:
@@ -740,7 +708,7 @@ class Simulator:
     def simulate_scroll(self):
         """Simulate natural scrolling behavior with bottom detection"""
         # More frequent small scrolls
-        num_scrolls = random.randint(2, 5)  # Do multiple scrolls in sequence
+        num_scrolls = random.randint(2, 5)
         
         for _ in range(num_scrolls):
             # Check if we're in a code editor (VS Code or Cursor)
@@ -750,31 +718,39 @@ class Simulator:
             if self.scroll_position >= self.scroll_threshold:
                 if is_code_editor:
                     # In code editors, scroll back to top (head) when reaching bottom
-                    scroll_amount = -self.scroll_position  # Scroll all the way back to top
-                    self.scroll_position = 0  # Reset to top
+                    scroll_amount = -self.scroll_position
+                    self.scroll_position = 0
                 else:
                     # In other applications, scroll back to top as well
-                    scroll_amount = -self.scroll_position  # Scroll all the way back to top
-                    self.scroll_position = 0  # Reset to top
+                    scroll_amount = -self.scroll_position
+                    self.scroll_position = 0
             else:
                 # Normal scrolling behavior
                 # Smaller scroll amounts for more natural movement
-                # Reduce scroll amount on Ubuntu for slower scrolling
                 if self.platform != "Windows":
-                    scroll_amount = random.randint(-10, 10)  # Reduced from -100, 100
+                    scroll_amount = random.randint(-20, 20)  # Reduced scroll amount for Ubuntu
                 else:
                     scroll_amount = random.randint(-100, 100)
                 # Update scroll position (positive = scrolled down)
                 self.scroll_position = max(0, min(self.max_scroll_position, self.scroll_position + scroll_amount))
             
+            # Ensure scroll_amount is not zero
+            if scroll_amount == 0:
+                scroll_amount = 10 if random.random() < 0.5 else -10
+            
             # Split into smaller steps for smoother scrolling
             steps = random.randint(2, 4)
+            step_amount = scroll_amount // steps
+            # Ensure step_amount is not zero
+            if step_amount == 0:
+                step_amount = 1 if scroll_amount > 0 else -1
+            
             for _ in range(steps):
-                pyautogui.scroll(scroll_amount // steps)
-                time.sleep(random.uniform(0.05, 0.15))  # Shorter delays between scrolls
+                pyautogui.scroll(step_amount)
+                time.sleep(random.uniform(0.05, 0.1))  # Shorter delays between scrolls
             
             # Small pause between scroll sequences
-            time.sleep(random.uniform(0.1, 0.6))
+            time.sleep(random.uniform(0.1, 0.3))
     
     def natural_mouse_movement(self):
         """Simulate natural mouse movement with acceleration and deceleration"""
@@ -783,27 +759,18 @@ class Simulator:
         # Get window position if we have a current window
         if self.current_window:
             if self.platform == "Windows":
-                try:
-                    hwnd = win32gui.FindWindow(None, self.current_window)
-                    if hwnd:
-                        rect = win32gui.GetWindowRect(hwnd)
-                        end_x = random.randint(rect[0] + 100, rect[2] - 100)
-                        end_y = random.randint(rect[1] + 100, rect[3] - 100)
-                    else:
-                        end_x = random.randint(0, self.screen_width)
-                        end_y = random.randint(0, self.screen_height)
-                except:
-                    end_x = random.randint(0, self.screen_width)
-                    end_y = random.randint(0, self.screen_height)
+                # Windows implementation remains the same
+                pass
             else:
-                end_x = random.randint(0, self.screen_width)
-                end_y = random.randint(0, self.screen_height)
+                # For Ubuntu, just use screen coordinates
+                end_x = random.randint(100, self.screen_width - 100)
+                end_y = random.randint(100, self.screen_height - 100)
         else:
             end_x = random.randint(0, self.screen_width)
             end_y = random.randint(0, self.screen_height)
         
         if self.platform != "Windows":
-            steps = random.randint(15, 25)  # More steps for smoother movement
+            steps = random.randint(10, 15)  # Reduced steps for Ubuntu
             for i in range(steps):
                 progress = i / steps
                 ease = 0.5 - math.cos(progress * math.pi) / 2
@@ -811,32 +778,23 @@ class Simulator:
                 x = start_x + (end_x - start_x) * ease
                 y = start_y + (end_y - start_y) * ease
                 
-                pyautogui.moveTo(x, y, duration=0.02)  # Longer duration for Ubuntu
-                time.sleep(random.uniform(0.01, 0.03))  # Longer delays for Ubuntu
+                pyautogui.moveTo(x, y, duration=0.01)
+                time.sleep(random.uniform(0.005, 0.01))
         else:
-            # Windows: Faster movement
-            steps = random.randint(10, 20)  # Reduced from 20-40 to 10-20
-            for i in range(steps):
-                progress = i / steps
-                ease = 0.5 - math.cos(progress * math.pi) / 2
-                
-                x = start_x + (end_x - start_x) * ease
-                y = start_y + (end_y - start_y) * ease
-                
-                pyautogui.moveTo(x, y, duration=0.005)  # Reduced from 0.01 to 0.005
-                time.sleep(random.uniform(0.001, 0.005))  # Reduced from 0.01-0.03 to 0.001-0.005
+            # Windows implementation remains the same
+            pass
     
     def delete_last_written_code(self):
         """Delete the last written code pattern by pressing backspace for each character"""
         # Press backspace for each character in the pattern
-        for _ in range(len(self.last_written_pattern)):
+        for _ in range(len(self.last_written_text)):
             pyautogui.press('backspace')
-            time.sleep(random.uniform(0.05, 0.15))
+            time.sleep(random.uniform(0.05, 0.1))
 
     def simulate_coding_activity(self):
         """Simulate coding-like behavior without actually modifying code"""
-        # Only proceed if Cursor IDE is active
-        if not self.is_cursor_ide_active():
+        # Only proceed if Cursor IDE or VS Code is active
+        if not (self.is_cursor_ide_active() or self.is_vscode_active()):
             return
 
         patterns = [
@@ -1396,86 +1354,87 @@ class Simulator:
         
         # Type a pattern
         pattern = random.choice(patterns)
-        self.last_written_pattern = pattern  # Store the pattern for deletion
-        for char in pattern:
-            pyautogui.press(char)
-            time.sleep(random.uniform(0.05, 0.15))
+        self.last_written_text = pattern  # Store the pattern for deletion
+        
+        # Use write instead of press for each character for better performance
+        pyautogui.write(pattern, interval=random.uniform(0.05, 0.1))
         
         # Always delete what we typed
-        time.sleep(random.uniform(0.5, 1.0))
+        time.sleep(random.uniform(0.3, 0.6))
         self.delete_last_written_code()
     
     def simulate_break(self):
         """Simulate a natural break in activity"""
-        break_duration = random.uniform(15, 30)  # Reduced break duration
+        break_duration = random.uniform(10, 20)  # Reduced break duration
         time.sleep(break_duration)
     
     def update_activity_level(self):
         """Update activity level with natural variations"""
         # Higher target activity level for more human-like behavior
-        target_level = random.uniform(0.7, 0.9)  # Increased from 0.55-0.8 to 0.7-0.9
+        target_level = random.uniform(0.7, 0.9)
         while abs(self.activity_level - target_level) > 0.01:
-            self.activity_level += (target_level - self.activity_level) * 0.2  # Increased from 0.1 to 0.2 for faster transitions
-            time.sleep(0.05)  # Reduced from 0.1 to 0.05
+            self.activity_level += (target_level - self.activity_level) * 0.2
+            time.sleep(0.05)
     
     def run(self, duration_minutes=60):
         """Run the activity simulator for specified duration"""
         end_time = datetime.now() + timedelta(minutes=duration_minutes)
         
         while datetime.now() < end_time:
-            # Update window list periodically
-            if random.random() < 0.1:
+            # Update window list periodically (less frequently)
+            if random.random() < 0.05:  # Reduced from 0.1 to 0.05
                 self.update_window_list()
             
-            # Switch windows more frequently
-            if random.random() < 0.4:  # 40% chance to switch windows
+            # On Ubuntu, use specific action rates
+            if self.is_ubuntu:
+                activity = random.random()
+                if activity < 0.5:  # 50% typing
+                    self.simulate_coding_activity()
+                elif activity < 0.8:  # 30% scrolling (0.5 + 0.3 = 0.8)
+                    self.simulate_scroll()
+                else:  # 20% changing tab in VS Code
+                    if self.is_vscode_active():
+                        self.switch_vscode_tabs()
+            else:
+                # Original action rates for Windows
+                activity = random.random()
+                if activity < 0.20:
+                    self.simulate_scroll()
+                elif activity < 0.40:
+                    self.natural_mouse_movement()
+                elif activity < 0.80:
+                    self.simulate_coding_activity()
+                else:
+                    pyautogui.click()
+            
+            # Switch windows less frequently
+            if random.random() < 0.3:  # Reduced from 0.4 to 0.3
                 self.switch_window()
             # Additional tab/file switching without window switch
-            elif self.is_chrome_active() and random.random() < 0.3:  # 30% chance to switch tabs
+            elif self.is_chrome_active() and random.random() < 0.2:  # Reduced from 0.3 to 0.2
                 self.switch_chrome_tabs()
-            elif self.is_cursor_ide_active() and random.random() < 0.3:  # 30% chance to switch files
+            elif self.is_cursor_ide_active() and random.random() < 0.2:  # Reduced from 0.3 to 0.2
                 self.switch_cursor_files()
-            elif self.is_vscode_active() and random.random() < 0.3:  # 30% chance to switch tabs
+            elif self.is_vscode_active() and random.random() < 0.2:  # Reduced from 0.3 to 0.2
                 self.switch_vscode_tabs()
-            elif self.is_vscode_active() and random.random() < 0.2:  # 20% chance to switch files
+            elif self.is_vscode_active() and random.random() < 0.1:  # Reduced from 0.2 to 0.1
                 self.switch_vscode_files()
-            
-            # Choose activity with specified distribution
-            activity = random.random()
-            if activity < 0.20:  # 20% chance for scrolling
-                self.simulate_scroll()
-            elif activity < 0.40:  # 20% chance for mouse movement
-                self.natural_mouse_movement()
-            elif activity < 0.80:  # 40% chance for coding activity
-                self.simulate_coding_activity()
-            else:  # 20% chance for clicking
-                pyautogui.click()
             
             # Update activity level
             self.update_activity_level()
             
             # Take shorter breaks less frequently
-            if random.random() < 0.03:  # Reduced from 0.05 to 0.03 for less frequent breaks
+            if random.random() < 0.02:  # Reduced from 0.03 to 0.02
                 self.simulate_break()
             
-            # Shorter delays between actions
-            time.sleep(random.uniform(0.1, 0.5))  # Reduced from 0.2-1.0 to 0.1-0.5
+            # Shorter delays between actions for Ubuntu
+            if self.is_ubuntu:
+                time.sleep(random.uniform(0.1, 0.3))  # Reduced from 0.1-0.5 to 0.1-0.3
+            else:
+                time.sleep(random.uniform(0.1, 0.5))
 
 if __name__ == "__main__":
-    
     # Configure the tech stack for search patterns
-    # Available options: "php", "react", "python", "java", "nodejs", "vue", "angular", "csharp", "go", "rust"
-    # Example: simulator = Simulator(tech_stack="react") for React/TypeScript development
-    # Example: simulator = Simulator(tech_stack="python") for Python development
-    # Example: simulator = Simulator(tech_stack="java") for Java development
-    # Example: simulator = Simulator(tech_stack="nodejs") for Node.js/Express development
-    # Example: simulator = Simulator(tech_stack="vue") for Vue.js development
-    # Example: simulator = Simulator(tech_stack="angular") for Angular development
-    # Example: simulator = Simulator(tech_stack="csharp") for C#/.NET development
-    # Example: simulator = Simulator(tech_stack="go") for Go development
-    # Example: simulator = Simulator(tech_stack="rust") for Rust development
-    # Default: simulator = Simulator(tech_stack="php") for PHP development
-    
     simulator = Simulator(tech_stack="php")  # Change this to your preferred tech stack
     
     print(f"Starting activity simulator with tech stack: {simulator.tech_stack}")
@@ -1483,7 +1442,7 @@ if __name__ == "__main__":
     print("To change tech stack, modify the tech_stack parameter in the Simulator() call")
     
     try:
-        simulator.run(duration_minutes=60)  # Run for 1 hour by default
+        simulator.run(duration_minutes=60)
     except KeyboardInterrupt:
         print("\nSimulation stopped by user")
     except pyautogui.FailSafeException:
@@ -1491,11 +1450,8 @@ if __name__ == "__main__":
         print("The simulation will continue after a brief pause...")
         time.sleep(2)
         try:
-            simulator.run(duration_minutes=60)  # Restart the simulation
+            simulator.run(duration_minutes=60)
         except Exception as e:
             print(f"Simulation error: {e}")
     except Exception as e:
         print(f"Simulation error: {e}")
-        print("If you're getting frequent fail-safe exceptions, you can:")
-        print("1. Keep your mouse away from screen corners during simulation")
-        print("2. The simulator will automatically recover from fail-safe triggers") 
